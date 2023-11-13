@@ -1,0 +1,7 @@
+web:
+  hostname: faijdherbe.docker
+  image: ubuntu/apache2
+  volumes:
+    - ./build/public_html:/var/www/html
+  ports:
+    - "8000:80"

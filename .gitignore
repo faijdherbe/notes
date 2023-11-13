@@ -1,0 +1,4 @@
+build
+src/**/index.html
+.packages
+private-sync-script.sh

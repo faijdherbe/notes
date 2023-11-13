@@ -1,0 +1,13 @@
+#+TITLE: emacs.el
+#+DATE: <2023-11-12 zo>
+
+#+begin_quote
+Work in progress, please come back later :-)
+#+end_quote
+
+This is page is still empty as I need to start migrating from my current setup.  
+
+* exwm
+Code specific to exwm, should only be loaded for laptop at this moment.  [[file:exwm.org][exwm]] config lives here.
+  
+

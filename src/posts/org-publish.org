@@ -1,0 +1,519 @@
+#+TITLE: org-publish
+#+DATE: <2023-11-12 zo>
+#+PROPRTY: :header-args: :tanlge no
+#+STARTUP: overview
+
+  #+BEGIN_PREVIEW
+Last year I decided i wanted to rewrite my Emacs config, and wanted to make it public through some kind of website/blog.  Being an Emacs and org-mode enthousiast I naturally wanted to work on it in a workflow that feels close to my daily habits.  So i went with Hugo,  a static site generiator that appearantly supports org-mode out of the box.  Guess what,.. I spent so much time trying to get things the way I wanted them to be that I kept postponing creating actual content up until the point that i forgot about that site all together,  So now there is a single post on some obscure Jira package that i wrote, and ahalf baked Emacs config that i couldn't get to both export nicely to the site and be useful as a config at the same time.  I guess the only piece of software that supports org-mode is org-mode itself.
+  #+END_PREVIEW
+  
+So with the new year (yay, new years resolutions) coming up, and a bunch of actual potential content in december (advent of code) I thought it might be a good idea to give this whole website/blog a new try.  This time going org-mode only.  And to keep it interesting, I'll use this very post as the literate configuration file for publishing the actual site itself.
+
+So wit no further ado, here we go.
+
+  Over the weekend I managed to get a few moments to sqeeze in some time to work on an initial config for this site.  Having only touched this part of Emacs a couple of years back I naturally spent quite some time in the manuals and online spitting through other people's configrations.  Not all examples and documentation is as complete as we can hope for,  Which emphasizes the need to publish my own configuration along with some context as for why I did it this way.
+
+* publish.el
+  :PROPERTIES:
+  :header-args: :mkdirp t :tangle ../../build/scripts/publish.el
+  :END:
+
+** Dependencies
+  Publishing with a pure vanilla Emacs sounds pretty awesome, but that appears to be an impossible route.  I think i was about half an hour in when I decided I wanted syntax highlighting on the sourceblocks, which requires an addidiotnal package called [[https://github.com/hniksic/emacs-htmlize][=htmlize=]].  This means pulling in a package, which in itself is not that hard, except when your publishing from a clean environment, i.e. no packages from my daily development setup will be available.
+
+So to be able to use external packages in our publishing environment, we'll first need to setup our dependencies.  [[https://systemcrafters.net/publishing-websites-with-org-mode/building-the-site/][This code]] is pulled from one of David Wilson's excellent System Crafters articles. 
+
+#+begin_src emacs-lisp 
+;; Set the package installation directory so that packages aren't stored in the
+;; ~/.emacs.d/elpa path.
+(require 'package)
+(setq package-user-dir (expand-file-name "./.packages"))
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("elpa" . "https://elpa.gnu.org/packages/")))
+
+;; Initialize the package system
+(package-initialize)
+(unless package-archive-contents
+  (package-refresh-contents))
+
+;; Install dependencies
+(package-install 'htmlize)
+
+;; require some additional packages
+(require 'ox-publish)
+#+end_src
+
+We'll also need some extra supporting functions as the default is rarely good enough for me.  The next method is used to generate the titles for the sitemap.  Borrowed from [[https://taingram.org/blog/org-mode-blog.html][here]].
+
+#+begin_src emacs-lisp
+(add-to-list 'org-export-options-alist '(:excerpt "EXCERPT" nil nil parse))
+
+;; https://www.danliden.com/posts/20211203-this-site.html
+(defun my/org-publish-find-excerpt (entry project)
+  "try to exctract excerpt from document"
+  (with-temp-buffer
+    (insert-file-contents (concat (org-publish-property :base-directory project) entry))
+    (goto-char (point-min))
+    (cond
+     ((re-search-forward "^\s*#\\+BEGIN_PREVIEW$" nil 1)
+      (progn
+        (goto-char (point-min))
+        (let ((beg (+ 1 (re-search-forward "^\s*#\\+BEGIN_PREVIEW$" nil 1)))
+              (end (progn (re-search-forward "^\s*#\\+END_PREVIEW$" nil 1)
+                          (match-beginning 0))))
+          (buffer-substring beg end))))
+     (nil "-"))))
+
+                                                             
+
+(defun my/org-sitemap-date-entry-format (entry style project)
+  "Format ENTRY in org-publish PROJECT Sitemap format ENTRY ENTRY STYLE format that includes date."
+  (let ((filename (org-publish-find-title entry project)))
+    (if (= (length filename) 0)
+        (format "*%s*" entry)
+      
+      (format "[[file:%s][%s]] {{{timestamp(%s)}}}\n%s"
+              entry
+              filename
+              (format-time-string "%Y-%m-%d"
+                                  (org-publish-find-date entry project))
+              (my/org-publish-find-excerpt entry project)
+))))
+
+(setq org-export-global-macros
+      '(("timestamp" . "@@html:<span class=\"timestamp\">$1</span>@@")
+        ("excerpt" . "@@html:<div class=\"excerpt\">$1</span>@@")))
+
+#+end_src
+
+And finally, I'll need to be able to read in some files to inject them as header and footer for every exported page.  As this is not a simple built-in function, here is a simple function that does just that.
+
+#+begin_src emacs-lisp
+(defun pub/read-file (filename)
+  "Return the contents of FILENAME."
+  (with-temp-buffer
+    (insert-file-contents filename)
+    (buffer-string)))
+#+end_src
+
+** Configuration
+:PROPERTIES:
+:header-args: :tangle ../../build/scripts/publish.el
+:END:
+#+begin_src emacs-lisp 
+(setq org-html-htmlize-output-type 'css)
+
+;; pretty source code
+(setq org-src-fontify-natively t)
+
+;; we'll use our own styling
+(setq org-html-head-include-default-style nil)
+
+;; include pre and postambles on every page
+(setq pub/preamble (pub/read-file "build/includes/preamble.html"))
+(setq pub/postamble (pub/read-file "build/includes/postamble.html"))
+
+;; this should be extracted to literate block with read-file to load
+(setq org-html-head-extra "
+<link rel=\"stylesheet\" type=\"text/css\" href=\"/assets/css/main.css\" />
+<link rel=\"stylesheet\" type=\"text/css\" href=\"/assets/css/htmlize.css\" />
+<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+")
+
+;; define all various parts of the export
+(setq org-publish-project-alist
+      `(
+        ("posts"
+         :base-directory "./src/posts/"
+         :base-extension "org"
+         :publishing-directory "./build/public_html/"
+         :recursive t
+         :publishing-function org-html-publish-to-html
+         :headline-levels 4
+         :auto-sitemap t
+         :html-preamble ,pub/preamble
+         :html-postamble ,pub/postamble
+         :sitemap-title "faijdherbe.net - posts"
+         :html-html5-fancy t
+         :sitemap-filename "index.html"
+         :with-tags nil
+         :html-link-org-files-as-html t
+         :section-numbers nil
+         :sitemap-sort-files anti-chronologically
+         :sitemap-format-entry my/org-sitemap-date-entry-format)
+
+        ("emacs"
+         :base-directory "./src/emacs/"
+         :base-extension "org"
+         :publishing-directory "./build/public_html/emacs/"
+         :recursive t
+         :publishing-function org-html-publish-to-html
+         :headline-levels 4
+         :html-preamble ,pub/preamble
+         :html-postamble ,pub/postamble
+         :html-html5-fancy t
+         :with-tags nil
+         :html-link-org-files-as-html t
+        )
+        
+
+        ("statics"
+         :base-directory "./assets/"
+         :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg"
+         :publishing-directory "./build/public_html/assets/"
+         :recursive t
+         :publishing-function org-publish-attachment
+         )
+        
+        ("tangled-statics"
+         :base-directory "./build/assets/"
+         :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg"
+         :publishing-directory "./build/public_html/assets/"
+         :recursive t
+         :publishing-function org-publish-attachment
+         )
+        
+        ("org" :components ("posts"
+                            "emacs"
+                            "statics"
+                            "tangled-statics"))
+        ;; ... add all the components here (see below)...
+
+        )
+)
+#+end_src
+
+
+And last but not least, the command to start the actual publication.  It's currently preceded by two commands that reset caches and timestamps as I'm still in the process of fixing CSS and stuff.  Without those commands Org would skip publication of files that "have not changed", which might be invalid due to undetected pre-/postamble fixes.
+#+begin_src emacs-lisp
+(org-publish-reset-cache)
+(org-publish-remove-all-timestamps)
+
+;; disable confirmation on export
+(setq org-confirm-babel-evaluate nil)
+
+(org-publish-project "org")
+(message "copy favicon")
+(copy-file "./src/favicon.ico" "./build/public_html/favicon.ico" t)
+#+end_src
+
+* Styling
+As the default published site looks and feels a bit /too/ basic,  we'll introduce a little styling ourselves.  Starting off with a custom header (=preamble=) and footer (=postamble=)
+
+
+** pre/postambles
+These pre- and postambles are both written in HTML, as I did not succeed in exporting these simple datastructures from org-mode.  Maybe later I'll be able to change is part.  The content's of this src_block wont be tangled, but injected into other blocks instead. 
+
+   #+NAME: preamble
+#+begin_src html :tangle ../../build/includes/preamble.html :mkdirp t
+<nav>
+    <span><a href="/">faijdherbe.net</span></a>
+    <ul>
+        <li><a href="/">posts</a></li>
+        <li><a href="/emacs/">emacs</a></li>
+    </ul>
+</nav>
+#+end_src
+
+#+NAME: postamble
+#+begin_src html :tangle ../../build/includes/postamble.html :mkdirp t
+<footer>
+  <span>Generated at %T</span>
+  <ul>
+    <li><a target="blank" href="https://github.com/faijdherbe">github</a></li>
+    <li><a target="blank" href="https://phpc.social/@jlfaijdherbe">mastodon</a></li>
+    <li><a target="blank" href="https://boardgamegeek.com/user/faijdherbe">bgg</a></li>
+  </ul>
+</footer>
+#+end_src
+
+** CSS
+To make this thing look a little bit better we'll need some CSS as well.  The css will consist of two files.  One will contain the syntax highlighting, and the other the styling of the pages.  We'll start of with the main styling.
+
+*** theme
+#+NAME: theme
+| key | name              | light | dark |
+|-----+-------------------+-------+------|
+| bg  | background        | #EEE  | #333 |
+| bgt | background tinted | #DDD  | #444 |
+| fg  | foreground        | #333  | #EEE |
+| fgt | foreground tinted | #444  | #DDD |
+| p   | primary           | #70F  | #0FF |
+| s   | secondary         | #F0F  | #F0F |
+
+ This code block is exuted while tangling the css file.  The css blocks in the rendered version of this document show the resolved colors based on the table above, but when looking at the source directly it looks something like ~a { color: <<color(key="p", mode="dark")>> }~. 
+#+NAME: color
+#+begin_src emacs-lisp :var key="fg" :var mode="light" :var theme=theme :results value :exports value :tangle no
+(let ((result (assoc key theme))
+      (err "#F00"))
+  (format "%s" (if (string= mode "dark") (cadddr result)
+   (caddr result))))
+#+end_src
+
+*** main.css
+:PROPERTIES:
+:header-args: :tangle ../../build/assets/css/main.css :mkdirp t :noweb yes
+:END:   
+
+The overall settings of the styling.  Set default margins, colors etc.
+#+begin_src css :noweb yes
+html, body {
+    background-color: <<color(key="bg")>>;
+    color: <<color(key="fg")>>;
+    margin: 0px;
+    height: 100%;
+}
+
+.src {
+    padding: 1em;
+    background-color: <<color(key="bgt")>>;
+    border-style: solid;
+    border-color: <<color(key="fgt")>>;
+    border-width: 0px 0px 1px 1px;
+    overflow: auto;           
+}
+
+.outline-2 {
+    padding-bottom: 3em;
+}
+
+.content {
+    max-width: 20cm;
+    text-align: justify;
+    margin: auto;
+}
+
+a {
+    color: <<color(key="p")>>;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+a:hover {
+    color: <<color(key="s")>>;
+}
+
+
+blockquote{
+    font-style: italic;
+    margin: 1em 0em;
+}
+#+end_src
+
+**** sitemap
+The sitemap is where the listing of the blogposts is presented.  It is (currently) a simple list of document titles and their publish date.
+#+begin_src css
+.org-ul {
+  list-style-type: none;
+  margin: 2em 0em 2em 0em;
+  padding: 0;
+}
+
+.org-ul li {
+    padding: 1em;
+    margin: 1em 0em 1em 0em;              
+}
+
+.org-ul li .timestamp {
+    display: block;
+    font-size: .75em;
+    font-style: italic;
+    margin-bottom: 1em;
+}
+#+end_src
+
+**** table of ontents
+#+begin_src css
+#table-of-contents {
+    padding: .5em 0em;
+    background-color: <<color(key="bgt")>>;
+    color: <<color(key="fgt")>>;
+    border-style: solid;
+    border-width: 0px 0px 0px 2px;
+    border-color: <<color(key="fgt")>>;
+    
+}
+#table-of-contents div {
+    padding: 0;
+}
+#table-of-contents h2 {
+    display: none;
+}
+
+#table-of-contents ul {
+    list-style-type: none;
+}
+#+end_src
+
+**** Preamble
+#+begin_src css
+
+#preamble {
+    border-style: dotted;
+    border-color: <<color(key="fgt")>>;
+    border-width: 0px 0px 1px 0px;
+}
+
+#preamble span {
+    float: right;
+    display: block;
+    margin: 0px 2px;
+    text-align: center;
+}
+
+#preamble ul {
+  list-style-type: none;
+  margin: 0px;
+  padding: 0;
+  overflow: hidden;
+}
+#preamble li {
+    display: inline;
+    float: left;
+    margin: 0px 2px;
+}
+#preamble a {
+  display: block;
+  font-weight: bolder;
+  text-align: center;
+  padding: 14px 16px;
+}
+#+end_src
+
+**** postamble
+#+begin_src css
+#postamble {
+    font-style: italic;
+    font-size: .75em;    
+    padding: 1em;
+    border-style: dotted;
+    border-width: 1px 0px 0px 0px;
+    border-color: <<color(key="fgt")>>
+}
+
+#postamble span {
+    float: left;
+}
+
+#postamble ul {
+    list-style-type: none;
+    margin: 0px;
+    padding: 0;
+    overflow: hidden;
+}
+#postamble li {
+    display: inline;
+    float: right;
+    margin: 0px 0px;
+}
+#postamble a {
+    display: block;
+    text-align: center;
+    padding: 0px 1em;
+}
+#+end_src
+
+**** media queries
+We've got a few media queries to support.  The first one will be for smaller screens (phones) as we want these to be able to read the site as well, and the second is about respecting the browser's / system's theme settings (dark vs. light).
+
+#+begin_src css
+@media only screen and (max-width: 600px) {
+    body {
+        margin: 1em;
+    }
+    #postamble ul {
+        text-align: center;
+    }
+    #postamble li {
+        float: none;
+        display: inline-block;
+    }
+    #postamble span {
+        float: none;
+        width: 100%;
+        text-align: center;
+        display: block;
+    }
+}
+#+end_src
+
+For dark themes, well switch the foreground and background colors, as well as the dark / light versions.  unfortunately i know no better way that to manually override every element that has some kind of color.
+#+begin_src css
+@media (prefers-color-scheme: dark) {
+    html, body {
+        background-color: <<color(key="bg", mode="dark")>>;
+        color: <<color(key="fg", mode="dark")>>;
+    }
+    .src {
+        background-color: <<color(key="bgt", mode="dark")>>;
+        border-color: <<color(key="fg", mode="dark")>>;
+    }
+    a {
+        color: <<color(key="p",mode="dark")>>;
+    }
+    a:hover {
+        color: <<color(key="s",mode="dark")>>;
+    }
+    #table-of-contents {
+        background-color: <<color(key="bgt",mode="dark")>>;
+        color: <<color(key="fg",mode="dark")>>;
+        border-color: <<color(key="fgt",mode="dark")>>;
+    }
+    #preamble {
+        border-color: <<color(key="fgt",mode="dark")>>;
+    }
+    #postamble {
+        border-color: <<color(key="fgt",mode="dark")>>;
+    }
+}
+
+#+end_src
+
+* Building
+** Makefile
+Whoah, recursion... You'll need this file to be tangled in order to tangle this file =:head-exploding:=.  So yes, you might want to do a manual tangle on this file in order to get the latest makefile published.  I could have also skipped this chapter and just link to the Makefile instead, but I think that this document would be incomplete if I did and... i like recursions.  If your viewing this documentation from the Github repository, you'll notice I've got this file checked in anyway, which is solely because I want to be able to publish directly from emacs using projectile, instead of having to manually tangle first.   (yeah I know, =C-c C-v t= is not /that/ hard to press, it's just not in my main flow and hopefully I there will be a point in time that I did'nt open this file for ages.  Having to look it up when migrating to a new laptop will be a real pain,  probably comparable to the man-flu. 
+
+#+begin_src makefile :tangle ../../Makefile
+clean:
+	echo "cleaning"
+	rm -rf build/public_html/*
+
+tangle:
+	echo "tangling"
+	emacs --batch -l org --eval "(setq org-confirm-babel-evaluate nil)" --eval "(org-babel-tangle-file \"src/posts/org-publish.org\")"
+
+build:
+	echo "building"
+	emacs --batch -l org --script "scripts/build.el"
+
+publish: 
+	echo "publishing"
+
+sync:
+	echo "syncing"
+	bash ./private-sync-script.sh
+
+#+end_src
+
+** sync to server
+To sync this to the server i've included a small bash script that I didn't publish in this document for security reasons.  But the contents look roughly like this:
+#+begin_src shell :tangle no
+#!/bin/bash
+scp -i <identityfile> \ 
+    -r \
+    build/public_html/* \
+    <username>@<hostname>:<remote-path>
+#+end_src
+   
+** Test server
+I saw something about an Elisp webserver while writing this documentation, but its getting late so I'm going to go the easy way and just publish the =Docker Compose= file instead.  It uses =Apache2= and does not like deleting the =build/= directory while it's running.  Hence the removal of the _contents_ of the public folder in the makefile above.
+
+#+begin_src yml :tangle ../../docker-compose.yaml
+web:
+  hostname: faijdherbe.docker
+  image: ubuntu/apache2
+  volumes:
+    - ./build/public_html:/var/www/html
+  ports:
+    - "8000:80"
+#+end_src

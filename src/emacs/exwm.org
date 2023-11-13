@@ -1,0 +1,5 @@
+#+TITLE: exwm
+
+#+begin_src emacs-lisp
+(message "exwm world")
+#+end_src

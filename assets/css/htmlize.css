@@ -1,0 +1,61 @@
+
+.org-builtin {
+    /* font-lock-builtin-face */
+    color: #859900;
+}
+.org-comment {
+    /* font-lock-comment-face */
+    color: #586e75;
+    font-style: italic;
+}
+.org-comment-delimiter {
+    /* font-lock-comment-delimiter-face */
+    color: #586e75;
+    font-style: italic;
+}
+.org-constant {
+    /* font-lock-constant-face */
+    color: #2aa198;
+}
+.org-doc {
+    /* font-lock-doc-face */
+    color: #586e75;
+    font-style: italic;
+}
+.org-function-name {
+    /* font-lock-function-name-face */
+    color: #268bd2;
+}
+.org-keyword {
+    /* font-lock-keyword-face */
+    color: #859900;
+}
+.org-negation-char {
+    /* font-lock-negation-char-face */
+    color: #dc322f;
+}
+.org-regexp-grouping-backslash {
+    /* font-lock-regexp-grouping-backslash */
+    color: #b58900;
+}
+.org-regexp-grouping-construct {
+    /* font-lock-regexp-grouping-construct */
+    color: #cb4b16;
+}
+.org-string {
+    /* font-lock-string-face */
+    color: #2aa198;
+}
+.org-type {
+    /* font-lock-type-face */
+    color: #b58900;
+}
+.org-variable-name {
+    /* font-lock-variable-name-face */
+    color: #268bd2;
+}
+.org-warning {
+    /* font-lock-warning-face */
+    color: #dc322f;
+    font-weight: bold;
+}
