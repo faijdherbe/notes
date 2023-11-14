@@ -262,6 +262,7 @@ html, body {
     color: <<color(key="fg")>>;
     margin: 0px;
     height: 100%;
+    line-height: 1.5em;
 }
 
 .src {
@@ -417,7 +418,7 @@ The sitemap is where the listing of the blogposts is presented.  It is (currentl
 We've got a few media queries to support.  The first one will be for smaller screens (phones) as we want these to be able to read the site as well, and the second is about respecting the browser's / system's theme settings (dark vs. light).
 
 #+begin_src css
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 20cm) {
     body {
         margin: 1em;
     }
@@ -504,7 +505,18 @@ scp -i <identityfile> \
     build/public_html/* \
     <username>@<hostname>:<remote-path>
 #+end_src
-   
+
+When running this script above on Termux (yes, i want to be able to write and publish from my phone, or my uConsole if it ever arrives) the file permissions on the server got messed up.  This =rsync= script seems to do a bit better, but is probably still not the best way to go.
+
+#+begin_src shell :tangle no
+#!/bin/bash
+rsync -r \
+      --perms \
+      --chmod=u+rwx,g+rx,o+rx \
+      ./build/public_html/* \
+      <username>@<hostname>:<remote-path>
+#+end_src
+
 ** Test server
 I saw something about an Elisp webserver while writing this documentation, but its getting late so I'm going to go the easy way and just publish the =Docker Compose= file instead.  It uses =Apache2= and does not like deleting the =build/= directory while it's running.  Hence the removal of the _contents_ of the public folder in the makefile above.
 

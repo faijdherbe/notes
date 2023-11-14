@@ -1,0 +1,12 @@
+#+TITLE: A fresh start, again
+#+DATE: <2023-11-13 ma>
+
+#+BEGIN_PREVIEW
+This adventure started about a year ago.  I decided I needed to rewrite my emacs and exwm config as they became too cluttered and buggy due to about 5 years of mindlessly adding stuff to it with no clear structure.  Now, almost 12 months later, these configs are becoming a nuisance and threaten my daily workflow.  Hence, a fresh new desire to rewrite them surfaced.  Only one thing kept me from getting right into it, which was that blog I started in January.  It was a Hugo project, filled with org-mode files and git submodules to incorporate files from other projects into this one.  I didn't want to work on it anymore.  A fresh start.  I decided to drop the Hugo project completely and restart with pure Emacs and org-mode.
+#+END_PREVIEW
+
+It took me about two days to get everything up and running.  I went from =org-publish.el= to =org-publish.org=, because as I was scavenging the internet for useful snippets I thought it might make a good post on the blog as well.  Got locked out of my hosting provider as I forgot how to get ssh access.  And had my usual struggles with CSS.  And while I was doing this, I figured I could use the actual document to tangle all required scripts into the right files and build from there.  That means that the site you are looking right now will be generated from [[file:org-publish.org][org-publish.org]].  And any changes or additions I make, will be added there as well.  A living document.
+
+Next to this I still intent on rewriting my current emacs+exwm configuration.  With the same intention on actually using a similar living document to boot my laptop into every morning.  The config wont be a blog post though, it will be a seperate category as it will consist of multiple levels of seperate org files.
+
+So... this website will host at least two living documents: my soon-to-be emacs-configuration and my current static-site generator using org-publish.  As they are living /public/ documents I intent to keep them as up to date and well documented as possible.  This way I hope to help other people configuring their emacs to their needs, and/or to help people who want to publish their own blog the same way I'm doing right here.  I know I'm pretty bad at doing this whole social media stuff so don't expect an overload of posts,  but at least I'll get my configs out in the open which is probably good enough for me. 
