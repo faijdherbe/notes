@@ -9,5 +9,9 @@ This is page is still empty as I need to start migrating from my current setup.
 
 * exwm
 Code specific to exwm, should only be loaded for laptop at this moment.  [[file:exwm.org][exwm]] config lives here.
-  
+
+* interface
+#+begin_src emacs-lisp
+(my/emacs-org-load-file "interface.org")
+#+end_src
 

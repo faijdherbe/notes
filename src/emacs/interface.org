@@ -1,0 +1,22 @@
+#+TITLE: Interface
+#+PROPERTY: header-aegs :tangle ~/.config/emacs-org/build/interface.el :mkdirp yes
+
+* basics
+
+remove unnessecary ui elements
+#+begin_src emacs-lisp
+  (menu-bar-mode 0)
+  (when (graphic-display-p)
+    (tool-bar-mode 0)
+    (scroll-bar-mode 0))
+
+#+end_src
+
+* theme
+I really like the modus themes.
+#+begin_src emacs_lisp
+(use-package modus-themes
+  :ensure t
+  :config
+  (load-theme 'modus-vivendi t))
+#+end_src
