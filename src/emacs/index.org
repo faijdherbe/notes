@@ -10,12 +10,20 @@ Work in progress, please come back later :-)
 This is page is still empty as I need to start migrating from my current setup.  
 
 * init
+#+begin_src emacs-lisp :tangle init.el
+(require 'org)
+
+(org-babel-load-file "~/.config/emacs-org/src/index.org")
+#+end_src
+
+
+* context  
 throughout loading our configs we'll need to know whether to enable certain elements.  This sets up all predicates for any kind of selection we'll need.  We start off with a few indicators as to which kind of device we're dealing with. 
 #+begin_src emacs-lisp
-(intern 'my/phone)
-(intern 'my/laptop)
-(intern 'my/uconsole)
-(intern 'my/unknown)
+(intern "my/phone")
+(intern "my/laptop")
+(intern "my/uconsole")
+(intern "my/unknown")
 #+end_src
 
 #+begin_src emacs-lisp
@@ -58,7 +66,14 @@ We'll be loading different org files for parsing so let's make it easy and less 
 
 (defun my/emacs-org-load-file (filename)
   ""
-  (org-babel-load-file (concat my/emacs-org-conf-basepath filename)))
+  (condition-case err
+      (org-babel-load-file (concat my/emacs-org-conf-basepath filename))
+    ((debug error) (progn
+                     (message (format "Error loading org-file: %S (%s)\n" err filename))
+                   (with-current-buffer (get-buffer-create "*org-load-errors*")
+                     (goto-char (point-max))
+                     (insert (format "Error loading org-file: %S (%s)\n" err filename)))))))
+
 #+end_src
 
 * exwm
@@ -72,7 +87,6 @@ Code specific to exwm, should only be included at specific situations.
            (display-graphic-p)
            (not (my/window-manager-p)))
   (my/emacs-org-load-file "exwm.org"))
-
 #+end_src
 
 * interface

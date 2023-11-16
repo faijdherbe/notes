@@ -1,5 +1,5 @@
 #+TITLE: exwm
-#+PROPERTY: header-args :tangle exwm.el
+#+PROPERTY: header-args :tangle yes
 
 #+begin_src emacs-lisp
 (message "exwm world")
