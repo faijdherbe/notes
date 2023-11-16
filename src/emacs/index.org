@@ -1,6 +1,6 @@
 #+TITLE: emacs.el
 #+DATE: <2023-11-12 zo>
-#+PROPERTY: header-args :tangle ~/.config/exwm-org/build/init.el :mkdirp t
+#+PROPERTY: header-args :tangle yes
 
 
 #+begin_quote
@@ -16,7 +16,9 @@ throughout loading our configs we'll need to know whether to enable certain elem
 (intern 'my/laptop)
 (intern 'my/uconsole)
 (intern 'my/unknown)
+#+end_src
 
+#+begin_src emacs-lisp
 (defconst my/device-type
   (let ((type (getenv "DEVICE_TYPE"))
         (hostname (system-name)))
@@ -46,12 +48,13 @@ We'll also want to know if there's a window manager available.
               (eq nil (get-buffer " *window-manager-error*")))))
 #+end_src
 
+
 * org babel
 
 We'll be loading different org files for parsing so let's make it easy and less error sensitive, so if one file fails, it won't take down the rest of the execution.
 
 #+begin_src emacs-lisp
-(defconst my/emacs-org-conf-basepath "~/.config/emacs-org/")
+(defconst my/emacs-org-conf-basepath "~/.config/emacs-org/src/")
 
 (defun my/emacs-org-load-file (filename)
   ""
@@ -62,7 +65,7 @@ We'll be loading different org files for parsing so let's make it easy and less 
 
 - config :: [[file:exwm.org][exwm.org]]
   
-Code specific to exwm, should only be at specific situations. 
+Code specific to exwm, should only be included at specific situations. 
   
 #+begin_src emacs-lisp
 (when (and (not (my/device-phone-p))
@@ -71,3 +74,11 @@ Code specific to exwm, should only be at specific situations.
   (my/emacs-org-load-file "exwm.org"))
 
 #+end_src
+
+* interface
+- config :: [[file:interface.org][interface.org]]
+
+#+begin_src emacs-lisp
+(my/emacs-org-load-file "interface.org")
+#+end_src
+

@@ -1,5 +1,5 @@
 #+TITLE: exwm
-#+PROPERTY: header-args :tangle ~/.config/exwm-org/build/exwm.el :mkdirp t
+#+PROPERTY: header-args :tangle exwm.el
 
 #+begin_src emacs-lisp
 (message "exwm world")
