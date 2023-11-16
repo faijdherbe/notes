@@ -1,5 +1,7 @@
 #+TITLE: emacs.el
 #+DATE: <2023-11-12 zo>
+#+PROPERTY: header-args :tangle ~/.config/exwm-org/build/init.el :mkdirp t
+
 
 #+begin_quote
 Work in progress, please come back later :-)
@@ -7,7 +9,65 @@ Work in progress, please come back later :-)
 
 This is page is still empty as I need to start migrating from my current setup.  
 
-* exwm
-Code specific to exwm, should only be loaded for laptop at this moment.  [[file:exwm.org][exwm]] config lives here.
-  
+* init
+throughout loading our configs we'll need to know whether to enable certain elements.  This sets up all predicates for any kind of selection we'll need.  We start off with a few indicators as to which kind of device we're dealing with. 
+#+begin_src emacs-lisp
+(intern 'my/phone)
+(intern 'my/laptop)
+(intern 'my/uconsole)
+(intern 'my/unknown)
 
+(defconst my/device-type
+  (let ((type (getenv "DEVICE_TYPE"))
+        (hostname (system-name)))
+    (cond
+     ((string= type "phone") 'my/phone)
+     ((string= hostname "jeroen-XPS-9320") 'my/laptop)
+     (t 'my/unknown))))
+     
+(defun my/device-phone-p ()
+  (eq my/device-type 'my/phone))
+
+(defun my/device-laptop-p ()
+  (eq my/device-type 'my/laptop))
+
+#+end_src
+
+We'll also want to know if there's a window manager available. 
+#+begin_src emacs-lisp
+(defun my/window-manager-p ()
+  (and (display-graphic-p)
+       (progn (when (get-buffer " *window-manager*")
+                (kill-buffer " *window-manager*"))
+              (when (get-buffer " *window-manager-error*")
+                (kill-buffer " *window-manager-error*"))
+              (when (executable-find "wmctrl")
+                (shell-command "wmctrl -m ; echo $?" " *window-manager*" " *window-manager-error*"))
+              (eq nil (get-buffer " *window-manager-error*")))))
+#+end_src
+
+* org babel
+
+We'll be loading different org files for parsing so let's make it easy and less error sensitive, so if one file fails, it won't take down the rest of the execution.
+
+#+begin_src emacs-lisp
+(defconst my/emacs-org-conf-basepath "~/.config/emacs-org/")
+
+(defun my/emacs-org-load-file (filename)
+  ""
+  (org-babel-load-file (concat my/emacs-org-conf-basepath filename)))
+#+end_src
+
+* exwm
+
+- config :: [[file:exwm.org][exwm.org]]
+  
+Code specific to exwm, should only be at specific situations. 
+  
+#+begin_src emacs-lisp
+(when (and (not (my/device-phone-p))
+           (display-graphic-p)
+           (not (my/window-manager-p)))
+  (my/emacs-org-load-file "exwm.org"))
+
+#+end_src
