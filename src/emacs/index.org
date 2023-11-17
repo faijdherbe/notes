@@ -111,9 +111,21 @@ Code specific to exwm, should only be included at specific situations.
 #+end_src
 
 * interface
-- config :: [[file:interface.org][interface.org]]
+[[file:interface.org][interface.org]]
 
 #+begin_src emacs-lisp
 (my/emacs-org-load-file "interface.org")
+#+end_src
+
+* org
+[[file:org.org][org.org]]
+#+begin_src emacs-lisp
+(my/emacs-org-load-file "org.org")
+#+end_src
+
+* generic development
+[[file:development.org][development.org]]
+#+begin_src emacs-lisp
+(my/emacs-org-load-file "development.org")
 #+end_src
 

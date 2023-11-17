@@ -1,0 +1,12 @@
+#+TITLE: generic development
+
+* generic
+** TODO eglot (LSP?)
+** TODO project.el (projecctile?)
+* language specific
+** TODO PHP
+** TODO GO
+** TODO Clojure
+** TODO python
+** TODO TS/js/Node
+** TODO C
