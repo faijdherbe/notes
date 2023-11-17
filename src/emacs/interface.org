@@ -16,9 +16,8 @@ remove unnessecary ui elements
 I really like the modus themes.
 #+begin_src emacs-lisp
 (use-package modus-themes
+  :straight t
   :ensure t
   :config
-  (load-theme 'modus-vivendi t))
-
-(foobar "xx")
+  (load-theme 'modus-vivendi-tinted t))
 #+end_src

@@ -10,12 +10,32 @@ Work in progress, please come back later :-)
 This is page is still empty as I need to start migrating from my current setup.  
 
 * init
+#+begin_src emacs-lisp
+(when (version< "27" emacs-version)
+  (message "version OK")
+  (setq package-enable-at-startup nil))
+
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 6))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
+(straight-use-package 'use-package)
+#+end_src
+
 #+begin_src emacs-lisp :tangle init.el
 (require 'org)
 
 (org-babel-load-file "~/.config/emacs-org/src/index.org")
 #+end_src
-
 
 * context  
 throughout loading our configs we'll need to know whether to enable certain elements.  This sets up all predicates for any kind of selection we'll need.  We start off with a few indicators as to which kind of device we're dealing with. 
@@ -72,7 +92,8 @@ We'll be loading different org files for parsing so let's make it easy and less 
                      (message (format "Error loading org-file: %S (%s)\n" err filename))
                    (with-current-buffer (get-buffer-create "*org-load-errors*")
                      (goto-char (point-max))
-                     (insert (format "Error loading org-file: %S (%s)\n" err filename)))))))
+                     (insert (format "Error loading org-file: %S (%s)\n" err filename))
+                     (insert (with-temp-buffer (backtrace) (buffer-string))))))))
 
 #+end_src
 
