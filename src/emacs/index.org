@@ -28,7 +28,6 @@ Currently there is an issue with org-mode verions...
 * init
 #+begin_src emacs-lisp :tangle init.el
  (when (version< "27" emacs-version)
-  (message "version OK")
   (setq package-enable-at-startup nil))
 
 (defvar bootstrap-version)
