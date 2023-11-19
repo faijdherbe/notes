@@ -1,0 +1,40 @@
+#+TITLE: Emacs on Boox Tab
+#+DATE: <2023-11-19 Sun>
+
+#+begin_preview
+While working on my new Emacs config I realized I wanted to be able to use my Emacs config on my Onyx Boox Tab Ultra as well.  The Boox Tab Ultra is an eInk tablet that runs Android 11, which means it will also run Termux.  I assumed it would be easy to get the config up and running as it already runs on my phone (an Oppo Find X5), but my experiences proved me wrong.  In this post I'll try to do a little retrospective on what I encountered, and how the Boox performs as an Emacs device.
+#+end_preview
+
+* First run
+
+For obvious reasons[fn:1] I had Termux already installed on the device, as well as Emacs itself.  I had been fiddling around with configuring it a bit but as I was incredibly used to my setup at work it never lasted more than a few minutes.  Trying to get something done without being able to rely on my muscle memory appears to be a real demotivator.
+
+Git was also installed so cloning the repository was a mere =git clone git@github.com:faijdherbe/notes.git= away.  I opened up the main org file (=src/emacs/index.org=) and tangled it (=C-c C-v t=) without making any changes, quit Emacs, and started it again.  I ran into some directory issues, but was able to mitigate those by disabling a few lines in the setup code.  Cool, goes pretty well thus far.  Next up; autostarting Emacs when starting Termux.  Why? because I can run terminals within Emacs as well and I'll more often want to edit documents rather than run commands.
+
+Termux ships with a small utility to configure the shell you login with called =chsh= (for "change-shell" I guess).  Restarted termux and it started pulling stuff again (modus-themes) which it appearantly didn't do the first time around[fn:2].  This took a while, the Boox proves to be a bit on the slow side when it comes to fetching packages. When done it loaded up the =modus-vivendi-tinted= theme and boy... does this look terrible on the Boox!  The high refreshrate of the e-ink display comes with an increased amount of ghosting[fn:3] and this does not do work well with dark backgrounds.  
+
+No problem right?  I already have some basic device detection in place that reads the =DEVICE_TYPE= environment variable which is set in my =.bashrc=.  Added the var, added some methods (=my/device-boox-p=) and restarted Termux.  This is where I spent over an hour to finally figure out this part of the config not only fails on my Boox (I ranted about this on Mastodon), but on my phone as well.  Setting another shell in Termux does not load =.bashrc=[fn:4] so our environment var was useless.
+I modified the code to look for specific files instead for the time being, but I might want to revert to an optional elisp configfile in the =~/.emacs.d= folder instead.
+
+Checking for a specific device (in this case, Boox) now boils down to this:
+#+begin_src emacs-lisp
+(defun my/device-boox-p ()
+  (file-exists-p "~/.DEVICE_BOOX"))
+#+end_src
+The file does not need to contain anything, its mere existence is enough.  This does pose the problem that if I accidentally were to add =~/.DEVICE_PHONE= as well, it would identify as both =phone= and =boox= device.  But thats a problem for later.
+
+Having this in place i was able to configure `modus-theme` to load `modus-operandi` if I'm on my Boox:
+#+begin_src emacs-lisp
+(load-theme (if my/device-boox-p 'modus-operandi
+                  modus-vivendi-tinted) t)
+#+end_src
+
+
+* Footnotes
+[fn:4] In hindsight this does make sense as we don't start bash at all.
+
+[fn:3] Ghosting is when you see faint traces of images displayed before the display refreshes to the a new image.
+
+[fn:2] which is something I need to look at later, as I'd rather have it install everything in one go.  
+
+[fn:1] I'm a geek, sorry.  First thing I do on a device that allows me to is to install everything I need to get Emacs running on it.  
