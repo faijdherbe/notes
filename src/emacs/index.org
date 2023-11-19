@@ -4,14 +4,30 @@
 
 
 #+begin_quote
-Work in progress, please come back later :-)
+Work in progress, there will be errors
+
+Currently there is an issue with org-mode verions...
 #+end_quote
 
-This is page is still empty as I need to start migrating from my current setup.  
+
+* installation
+#+begin_src emacs-lisp :tangle no :results silent
+  (org-babel-tangle)
+  (let ((dir (file-name-directory (buffer-file-name)))
+	(target "~/.config/emacs-org/src"))
+    (delete-file "~/.emacs.d/init.el")
+    (make-directory "~/.config/emacs-org/" t)
+    (cond
+;     ((file-directory-p target) (delete-directory target t))
+     ((file-symlink-p target) (delete-file target)))
+    (make-symbolic-link dir target t)
+    (make-symbolic-link (concat dir "init.el") "~/.emacs.d/init.el" t))
+  (message "emacs conf bootstrapped, please relaunch emacs")
+#+end_src
 
 * init
-#+begin_src emacs-lisp
-(when (version< "27" emacs-version)
+#+begin_src emacs-lisp :tangle init.el
+ (when (version< "27" emacs-version)
   (message "version OK")
   (setq package-enable-at-startup nil))
 
@@ -27,39 +43,48 @@ This is page is still empty as I need to start migrating from my current setup.
       (goto-char (point-max))
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
-
+(straight-use-package 'org)
 (straight-use-package 'use-package)
 #+end_src
 
 #+begin_src emacs-lisp :tangle init.el
 (require 'org)
-
+(message "hello")
 (org-babel-load-file "~/.config/emacs-org/src/index.org")
 #+end_src
 
 * context  
 throughout loading our configs we'll need to know whether to enable certain elements.  This sets up all predicates for any kind of selection we'll need.  We start off with a few indicators as to which kind of device we're dealing with. 
 #+begin_src emacs-lisp
-(intern "my/phone")
-(intern "my/laptop")
-(intern "my/uconsole")
-(intern "my/unknown")
+  (intern "my/phone")
+  (intern "my/laptop")
+  (intern "my/uconsole")
+  (intern "my/boox")
+  (intern "my/unknown")
 #+end_src
 
 #+begin_src emacs-lisp
-(defconst my/device-type
-  (let ((type (getenv "DEVICE_TYPE"))
-        (hostname (system-name)))
-    (cond
-     ((string= type "phone") 'my/phone)
-     ((string= hostname "jeroen-XPS-9320") 'my/laptop)
-     (t 'my/unknown))))
-     
-(defun my/device-phone-p ()
-  (eq my/device-type 'my/phone))
+  (defconst my/device-type
+    (let ((phone (file-exists-p "~/.DEVICE_PHONE"))
+	  (boox (file-exists-p "~/.DEVICE_BOOX"))
+	  (hostname (system-name)))
+      (cond
+       (phone 'my/phone)
+       (boox 'my/boox)
+       ((string= hostname "jeroen-XPS-9320") 'my/laptop)
+       (t 'my/unknown))))
 
-(defun my/device-laptop-p ()
-  (eq my/device-type 'my/laptop))
+  (defun my/device-phone-p ()
+    (eq my/device-type 'my/phone))
+
+  (defun my/device-laptop-p ()
+    (eq my/device-type 'my/laptop))
+
+  (defun my/device-boox-p ()
+    (eq my/device-type 'my/boox))
+
+  (defun my/prefer-light-p ()
+    (my/device-boox-p))
 
 #+end_src
 

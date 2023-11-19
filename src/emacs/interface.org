@@ -15,11 +15,12 @@ remove unnessecary ui elements
 * theme
 I really like the modus themes.
 #+begin_src emacs-lisp
-(use-package modus-themes
-  :straight t
-  :ensure t
-  :config
-  (load-theme 'modus-vivendi-tinted t))
+  (use-package modus-themes
+    :straight t
+    :ensure t
+    :config
+    (load-theme (if (my/prefer-light-p) 'modus-operandi
+		  'modus-vivendi-tinted) t))
 #+end_src
 
 * swiper
@@ -54,4 +55,8 @@ I really like the modus themes.
 (global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
 (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history)
 
+#+end_src
+
+#+begin_src emacs-lisp
+(global-set-key (kbd "M-SPC") 'set-mark-command)
 #+end_src
