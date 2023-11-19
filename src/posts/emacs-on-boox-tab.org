@@ -11,23 +11,48 @@ For obvious reasons[fn:1] I had Termux already installed on the device, as well 
 
 Git was also installed so cloning the repository was a mere =git clone git@github.com:faijdherbe/notes.git= away.  I opened up the main org file (=src/emacs/index.org=) and tangled it (=C-c C-v t=) without making any changes, quit Emacs, and started it again.  I ran into some directory issues, but was able to mitigate those by disabling a few lines in the setup code.  Cool, goes pretty well thus far.  Next up; autostarting Emacs when starting Termux.  Why? because I can run terminals within Emacs as well and I'll more often want to edit documents rather than run commands.
 
-Termux ships with a small utility to configure the shell you login with called =chsh= (for "change-shell" I guess).  Restarted termux and it started pulling stuff again (modus-themes) which it appearantly didn't do the first time around[fn:2].  This took a while, the Boox proves to be a bit on the slow side when it comes to fetching packages. When done it loaded up the =modus-vivendi-tinted= theme and boy... does this look terrible on the Boox!  The high refreshrate of the e-ink display comes with an increased amount of ghosting[fn:3] and this does not do work well with dark backgrounds.  
+Termux ships with a small utility to configure the shell you login with called =chsh= (for "change-shell" I guess).  Restarted Termux and it started pulling stuff again (modus-themes) which it appearantly didn't do the first time around[fn:2].  This took a while, the Boox proves to be a bit on the slow side when it comes to fetching packages.  When done it loaded up the =modus-vivendi-tinted= theme and boy... does this look terrible on the Boox!  The high refreshrate of the e-ink display comes with an increased amount of ghosting[fn:3] and this does not work well with dark backgrounds.  
 
-No problem right?  I already have some basic device detection in place that reads the =DEVICE_TYPE= environment variable which is set in my =.bashrc=.  Added the var, added some methods (=my/device-boox-p=) and restarted Termux.  This is where I spent over an hour to finally figure out this part of the config not only fails on my Boox (I ranted about this on Mastodon), but on my phone as well.  Setting another shell in Termux does not load =.bashrc=[fn:4] so our environment var was useless.
+No problem right?  I already have some basic device detection in place that reads the =DEVICE_TYPE= environment variable which is set in my =.bashrc=.  Added the var, added some methods (=my/device-boox-p=) and restarted Termux.  This is where I spent over an hour tbefore finally figuring out this part of the config not only fails on my Boox (I ranted about this on Mastodon), but on my phone as well.  Setting an alternative shell in Termux does not load =.bashrc=[fn:4] so our environment var was useless.
 I modified the code to look for specific files instead for the time being, but I might want to revert to an optional elisp configfile in the =~/.emacs.d= folder instead.
 
 Checking for a specific device (in this case, Boox) now boils down to this:
+
 #+begin_src emacs-lisp
 (defun my/device-boox-p ()
   (file-exists-p "~/.DEVICE_BOOX"))
 #+end_src
-The file does not need to contain anything, its mere existence is enough.  This does pose the problem that if I accidentally were to add =~/.DEVICE_PHONE= as well, it would identify as both =phone= and =boox= device.  But thats a problem for later.
 
-Having this in place i was able to configure `modus-theme` to load `modus-operandi` if I'm on my Boox:
+The file does not need to contain anything, its mere existence is enough.  This does pose the problem that if I accidentally were to add =~/.DEVICE_PHONE= as well, it would identify as both =phone= and =boox= device.  But thats a problem for later. 
+
+Having this in place I was able to configure `modus-theme` to load `modus-operandi` if whenever I'm on my Boox:
 #+begin_src emacs-lisp
 (load-theme (if my/device-boox-p 'modus-operandi
-                  modus-vivendi-tinted) t)
+                  'modus-vivendi-tinted) t)
 #+end_src
+
+* org-roam
+While testing I also tried to see if org-roam worked as expected.  It didn't.  org-roam requires a newer version of org-mode than the one shipped with Emacs, but once the old version is loaded it cannot load a new version.  This means moving the straight install instructions for org-mode to very early in the initialization process.  I already had an =init.el= script in place, so i just had to change the =:tangle= directive.
+
+Simply restarting Emacs did not work, so I went with a more rudimentary approach:  I deleted =~/.emacs.d=, recreated it and executed the init script at the top of my config.  Now the restart /did/ do something.  The minibuffer was pretty clear on what it was doing, and it kept telling me the same thing for at least 25 minutes: =Building org-roam → Building org...=.  After these 25 minutes I stopped staring at the e-ink display and went to look at my TV instead.  So while I'm not entirely sure on how long it actually took to "build org-roam",  I do know it took a shockingly long time to complete.  At least compared to my phone.  The next morning I encountered a similar waiting time when I added =magit= to my setup.
+
+It's tempting to assume the whole Termux+Emacs on Boox experience is too slow to be workable, but I'm not sure that holds up.  Sure the refreshrate of the screen is not as high as any other device, and its processing powers are quit low.  But writing this blog post on the Boox is working pretty well.
+
+* Experiences
+** Speed
+Installing everything takes a very long time, and I've just written a very small part of what the config will grow out to be.  So it will only taker longer in the future.  I'll also want to upgrade packages eventually which will need to be something I'll need to plan ahead.  But when everything is installed, the overall speed is good enough for me.
+
+** UX
+The UX is something I'll need to get used to.  The screen is black and white and the only real markup I can distinguish is regular vs bold.  This is to be expected as everthing has the same font, but syntax highlighting is pretty much useless.
+
+** Keybindings
+Another issue I've encountered is that the OS reserved the =C-SPC= keybinding for switching keyboard layouts, even if you've only enabled one.  This means no =set-mark-command= to starting marking an area.  Not a major issue, but an annoying one when your fingers just want to hit =C-SPC= all the time.  I've remapped it to =M-SPC= for now, we'll see where it goes.
+
+Another keybinding that does not appear to work correctly is =C-c C-,=, which should open a buffer to create an org-mode block, like =#+begin_src=.
+
+
+* Conclusion
+It took me a while to get things running, but most of that time was due to an error I made myself in the initialization script and due to the extremely long build times of org-roam.  After this, it looks like this could work out pretty good.  I'll have to get used to the purely black and white screen when it comes to writing code.  And it might pretty well result in me not writing code on this device.  Writing documentation or posts on the other hand looks promising.  But the next e-ink tablet I buy will probably be one with more colors and hopefully more processing power.
 
 
 * Footnotes
@@ -35,6 +60,6 @@ Having this in place i was able to configure `modus-theme` to load `modus-operan
 
 [fn:3] Ghosting is when you see faint traces of images displayed before the display refreshes to the a new image.
 
-[fn:2] which is something I need to look at later, as I'd rather have it install everything in one go.  
+[fn:2] Which is something I need to look at later, as I'd rather have it install everything in one go.  
 
-[fn:1] I'm a geek, sorry.  First thing I do on a device that allows me to is to install everything I need to get Emacs running on it.  
+[fn:1] I'm a geek, sorry.  I install Emacs everywhere.
