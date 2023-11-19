@@ -3,6 +3,7 @@
 * TODO org roam
 #+begin_src emacs-lisp
   (use-package org-roam
+    :straight t
     :ensure t
     :custom
     (org-roam-directory (file-truename "~/Documents/org-roam/"))

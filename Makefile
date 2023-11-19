@@ -12,7 +12,7 @@ build:
 
 publish: 
 	echo "publishing"
-
-sync:
-	echo "syncing"
 	bash ./private-sync-script.sh
+
+all: tangle build publish  	
+	echo "all done"
