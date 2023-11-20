@@ -1,0 +1,12 @@
+#+TITLE: social.org
+#+PROPERTY: headers-args :tangle yes
+
+* Mastodon
+#+begin_src
+(use-package mastodon
+ :straight t
+ :ensure t
+ :config
+ (setq mastodon-active-user "jlfaijdherbe"
+       mastodon-instance-ulr "https://phpc.social"))
+#+end_src

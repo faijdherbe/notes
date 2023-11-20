@@ -151,3 +151,10 @@ Code specific to exwm, should only be included at specific situations.
 (my/emacs-org-load-file "development.org")
 #+end_src
 
+* social
+[[file:social.org][social.org]]
+
+#+begin_src emacs-lisp
+(my/emacs-org-load-file "social.org")
+#+end_src
+
