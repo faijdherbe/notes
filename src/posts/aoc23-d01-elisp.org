@@ -6,7 +6,7 @@
 I should have started preparing things more in advance, but I seem to fail that kind stuf most of the time.  And on top of all this, I got sick last night and didn't sleep all that well.  Really bummed that I wasn't able to start solving the puzzles from the first minute.
 
 #+begin_preview
-I had already seen this first puzzle was harder then first day puzzles of previous years.  There will probably be more elegant ways to solve these but for now I justed wanted to get them solved.  I spent most of my time trying to get tbe regex match working,  and fighting with my phone's keyboard.  Yes, I coded this in Emacs running in Termux on my phone.  Which isn't something I'd recommend anyone to do.
+I had already seen this first puzzle was harder then first day puzzles of previous years.  There will probably be more elegant ways to solve these but for now I justed wanted to get them solved.  I spent most of my time trying to get the regex match working,  and fighting with my phone's keyboard.  Yes, I coded this in Emacs running in Termux on my phone.  Which isn't something I'd recommend anyone to do.
 #+end_preview
 
 * inputs                                                           :noexport:
