@@ -1,6 +1,13 @@
 #+TITLE: generic development
 
 * generic
+** Magit
+#+begin_src emacs-lisp
+(use-package magit
+  :straight t
+  :ensure t)
+#+end_src
+
 ** TODO eglot (LSP?)
 ** TODO project.el (projecctile?)
 * language specific
