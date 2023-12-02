@@ -1,0 +1,23 @@
+#+TITLE: Advent Of Code '23 - day 02
+#+date: <2023-12-02 Sat>
+
+* Inputs
+** Example
+#+name: example
+#+begin_example
+#+end_example
+
+** Input                                                           :noexport:
+#+name: input
+#+begin_example
+#+end_example
+
+* Part 1
+
+#+begin_src elisp :var input=example
+#+end_src
+
+* Part 2
+
+#+begin_src elisp :var input=example
+#+end_src
