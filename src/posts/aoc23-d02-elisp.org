@@ -1,6 +1,10 @@
 #+TITLE: Advent Of Code '23 - day 02
 #+date: <2023-12-02 Sat>
 
+#+begin_preview
+This took me way too long.  After struggling for hours with regexps in elisp I decided to stop using them completely and just do some string splitting instead.  Part 2 was solved quickly as I could reuse the same datamodel from part 1.
+#+end_preview
+
 * Inputs
 ** Example
 #+name: example
