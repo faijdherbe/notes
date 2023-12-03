@@ -2,11 +2,11 @@
 #+Date: <2023-12-03 Sun>
 
 #+begin_preview
-This might be one of the last days I'll be using elisp.  The puzzles are taking longer to solve and I don't really foresee lots of freee time comning week.  The first part went pretty quickly.  The second deserved a completely new approach, where I'd search for all stars first, and (rather ugly) look for neighboring numbers.
+This might be one of the last days I'll be using elisp.  The puzzles are taking longer to solve and I don't really forsee lots of free time in the coming week.  The first part went pretty quickly.  The second deserved a completely new approach, where I'd search for all stars first, and (rather ugly) look for neighboring numbers.
 #+end_preview
 
-* input
-** example
+* Input
+** Example
 #+name: example
 #+begin_example
 467..114..
@@ -21,7 +21,7 @@ This might be one of the last days I'll be using elisp.  The puzzles are taking 
 .664.598..
 #+end_example
 
-** input                                                           :noexport:
+** Input                                                           :noexport:
 #+name: input
 #+begin_example
 .........398.............551.....................452..................712.996.................646.40...1.....875..958.553...................
@@ -166,7 +166,7 @@ This might be one of the last days I'll be using elisp.  The puzzles are taking 
 ............595.........566.............847............456...................................182.........................791........533.....
 #+end_example
 
-* part 1
+* Part 1
 This solution scans the input row by row, character by character.  If the current character is a number, it looks around for a special symbol.   When done parsing, and it did see a special symbol, the number gets added to a list.  
 #+begin_src elisp :var input=input
   (defun string-numberp(s)
@@ -224,7 +224,7 @@ This solution scans the input row by row, character by character.  If the curren
 : 544433
 
 
-* part 2
+* Part 2
 This 
 #+begin_src elisp :var input=input
   (defun string-numberp(s)
