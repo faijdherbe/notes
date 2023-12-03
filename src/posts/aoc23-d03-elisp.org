@@ -2,7 +2,7 @@
 #+Date: <2023-12-03 Sun>
 
 #+begin_preview
-
+This might be one of the last days I'll be using elisp.  The puzzles are taking longer to solve and I don't really foresee lots of freee time comning week.  The first part went pretty quickly.  The second deserved a completely new approach, where I'd search for all stars first, and (rather ugly) look for neighboring numbers.
 #+end_preview
 
 * input
@@ -167,6 +167,7 @@
 #+end_example
 
 * part 1
+This solution scans the input row by row, character by character.  If the current character is a number, it looks around for a special symbol.   When done parsing, and it did see a special symbol, the number gets added to a list.  
 #+begin_src elisp :var input=input
   (defun string-numberp(s)
     (condition-case invalid-read-syntax
@@ -224,47 +225,54 @@
 
 
 * part 2
-#+begin_src elisp :var input=example
+This 
+#+begin_src elisp :var input=input
   (defun string-numberp(s)
     (condition-case invalid-read-syntax
 	(numberp(read s))
       (error nil)))
-  (defun aoc23/parse (i field)
+
+(defun aoc23/parse (i field)
+  (when (and (>= i 0)
+             (< i (length field)))
     (when (string-numberp (substring field i (1+ i)))
       (let ((start i)
 	    (end i))
-	(while (string-numberp (substring field (1- start) start))
+	(while (and (>= (1- start) 0)
+                    (string-numberp (substring field (1- start) start)))
 	  (setq start (1- start)))
-	(while (string-numberp (substring field (1+ end) (+ 2 end)))
+	(while (and (< (1+ end) (length field))
+                    (string-numberp (substring field end (1+ end))))
 	  (setq end (1+ end)))
 
-	(substring field start end)
-	)))
+	(string-to-number (substring field start end))
+	))))
 
   (defun aoc23/scan-pairs (offset input length)
     (let ((numbers '()))
-      (when (aoc23/parse (1- offset) length)
-	(setq numbers (append numbers (aoc23/parse (1- offset) length))))
-      (when (aoc23/parse (1+ offset) length)
-	(setq numbers (append numbers (aoc23/parse (1- offset) length))))
-      (let ((up (- offset length))
-	    (down (+ offset length)))
-	(if (aoc23/parse up length)
-	    (set numbers (append numbers (aoc23/parse up length)))
+      (when (aoc23/parse (1- offset) input)
+	(setq numbers (append numbers (list (aoc23/parse (1- offset) input)))))
+      (when (aoc23/parse (1+ offset) input)
+	(setq numbers (append numbers (list (aoc23/parse (1+ offset) input)))))
+      (let ((up (- offset (1+ length)))
+	    (down (+ offset (1+ length))))
+	(if (aoc23/parse up input)
+	    (setq numbers (append numbers (list (aoc23/parse up input))))
 	  (progn
-	    (when (aoc23/parse (1- up) length)
-	      (setq numbers (append (numbers (aoc23/parse (1- up) length)))))
-	    (when (aoc23/parse (1+ up) length)
-	      (setq numbers (append (numbers (aoc23/parse (1+ up) length)))))))
-	(if (aoc23/parse down length)
-	    (set numbers (append numbers (aoc23/parse down length)))
+	    (when (aoc23/parse (1- up) input)
+	      (setq numbers (append numbers (list (aoc23/parse (1- up) input)))))
+	    (when (aoc23/parse (1+ up) input)
+	      (setq numbers (append numbers (list (aoc23/parse (1+ up) input)))))))
+	(if (aoc23/parse down input)
+	    (setq numbers (append numbers (list (aoc23/parse down input))))
 	  (progn
-	    (when (aoc23/parse (1- down) length)
-	      (setq numbers (append (numbers (aoc23/parse (1- down) length)))))
-	    (when (aoc23/parse (1+ down) length)
-	      (setq numbers (append (numbers (aoc23/parse (1+ down) length)))))))
-	(when (eq 2 (length numbers))
-	  (apply '* numbers)))))
+	    (when (aoc23/parse (1- down) input)
+	      (setq numbers (append numbers (list (aoc23/parse (1- down) input)))))
+	    (when (aoc23/parse (1+ down) input)
+	      (setq numbers (append numbers (list (aoc23/parse (1+ down) input))))))))
+      (when (eq 2 (length numbers))
+(message "pair %S @ %d" numbers offset)
+	(apply '* numbers))))
 
 
 
@@ -272,11 +280,20 @@
   (let ((i 0)
 	(l (length (car (string-split input))))
 	(ratios '()))
-    (while (setq i (string-search "*" input (+ i 1)))
+    (while (setq i (string-search "*" input i))
       (let ((r (aoc23/scan-pairs i input l)))
 	(when r
-	  (setq ratios (append ratios r))))))
+	  (setq ratios (append ratios (list r)))))
+(setq i (1+ i)))
+(apply '+ ratios))
 
+;; (let* ((input "467..114..
+;; ...*......
+;; ..35..633.")
+;;        (s (string-search "*" input))
+;;        (l (string-search "\n" input)))
+;;   (aoc23/scan-pairs s input (1+ l)))
 #+end_src
 
 #+RESULTS:
+: 76314915
