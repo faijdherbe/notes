@@ -232,21 +232,21 @@ This
 	(numberp(read s))
       (error nil)))
 
-(defun aoc23/parse (i field)
-  (when (and (>= i 0)
-             (< i (length field)))
-    (when (string-numberp (substring field i (1+ i)))
-      (let ((start i)
-	    (end i))
-	(while (and (>= (1- start) 0)
-                    (string-numberp (substring field (1- start) start)))
-	  (setq start (1- start)))
-	(while (and (< (1+ end) (length field))
-                    (string-numberp (substring field end (1+ end))))
-	  (setq end (1+ end)))
+  (defun aoc23/parse (i field)
+    (when (and (>= i 0)
+	       (< i (length field)))
+      (when (string-numberp (substring field i (1+ i)))
+	(let ((start i)
+	      (end i))
+	  (while (and (>= (1- start) 0)
+		      (string-numberp (substring field (1- start) start)))
+	    (setq start (1- start)))
+	  (while (and (< (1+ end) (length field))
+		      (string-numberp (substring field end (1+ end))))
+	    (setq end (1+ end)))
 
-	(string-to-number (substring field start end))
-	))))
+	  (string-to-number (substring field start end))
+	  ))))
 
   (defun aoc23/scan-pairs (offset input length)
     (let ((numbers '()))
@@ -271,7 +271,7 @@ This
 	    (when (aoc23/parse (1+ down) input)
 	      (setq numbers (append numbers (list (aoc23/parse (1+ down) input))))))))
       (when (eq 2 (length numbers))
-(message "pair %S @ %d" numbers offset)
+	(message "pair %S @ %d" numbers offset)
 	(apply '* numbers))))
 
 
@@ -284,15 +284,15 @@ This
       (let ((r (aoc23/scan-pairs i input l)))
 	(when r
 	  (setq ratios (append ratios (list r)))))
-(setq i (1+ i)))
-(apply '+ ratios))
+      (setq i (1+ i)))
+    (apply '+ ratios))
 
-;; (let* ((input "467..114..
-;; ...*......
-;; ..35..633.")
-;;        (s (string-search "*" input))
-;;        (l (string-search "\n" input)))
-;;   (aoc23/scan-pairs s input (1+ l)))
+  ;; (let* ((input "467..114..
+  ;; ...*......
+  ;; ..35..633.")
+  ;;        (s (string-search "*" input))
+  ;;        (l (string-search "\n" input)))
+  ;;   (aoc23/scan-pairs s input (1+ l)))
 #+end_src
 
 #+RESULTS:
