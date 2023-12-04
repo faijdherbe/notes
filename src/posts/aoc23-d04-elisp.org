@@ -248,5 +248,58 @@ Card 189: 70 29 33 24  9 10 48 42 60 65 | 26 92 27 76 90  1 37 78 35 66 20 43 45
 : 21105
 
 * Part 2
-#+begin_src elisp :var input=example
+#+begin_src elisp :var input=input
+(defun aoc23/score-card (card)
+  (length (seq-intersection (alist-get :winning-numbers card)
+                            (alist-get :my-numbers card))))
+
+(defun aoc23/parse-card-id (string)
+  (string-to-number (cadr (string-split string))))
+
+(defun aoc23/string-to-model (string)
+  (let* ((parts (string-split string ":"))\
+         (game (car parts))
+         (numbers (cadr parts))
+         (parts (string-split numbers "|"))
+         (winning-numbers (car parts))
+         (my-numbers (cadr parts))
+         (winning-numbers (mapcar 'string-to-number (string-split winning-numbers)))
+         (my-numbers (mapcar 'string-to-number (string-split my-numbers))))
+    `(,game
+      (:winning-numbers . ,winning-numbers)
+      (:my-numbers . ,my-numbers))))
+
+
+(let ((cards (mapcar 'aoc23/string-to-model (seq-filter (lambda (s) (< 0 (length s)))
+                                                        (string-split input "\n"))))
+      (bonus  '())
+      (current 1)
+      (counter 0))
+  ;; set rounds per card on 1 for each card
+  (dolist (card cards)
+    (setf (alist-get (aoc23/parse-card-id (car card)) bonus) 1))
+
+  ;; walk cards
+  (dolist (card cards)
+    (let ((score (aoc23/score-card card)))
+      (dotimes (s (alist-get current bonus))
+        (setq counter (1+ counter))
+        (dotimes (i score)
+          (let ((bonus-index (+ current i 1)))
+          (setf (alist-get bonus-index bonus) (1+ (alist-get bonus-index bonus)))))))
+    (setq current (1+ current)))
+  counter)
+
+
+
+;;
+;;  (dolist (card cards)
+;;    (dotimes (i (alist-get (car card) bonus))
+;;      (dotimes (c (aoc23/score-card card))
+;;        (let ((game (format "Card %d" (+ current c 1))))
+;;          (setf (alist-get game bonus) (+ 1 (alist-get game bonus))))))
+;;    (setq current (1+ current))))
 #+end_src
+
+#+RESULTS:
+: 5329815
