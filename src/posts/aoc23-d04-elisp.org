@@ -2,6 +2,7 @@
 #+date: <2023-12-04 ma>
 
 #+begin_preview
+Today was easier.  I managed to complete the first part in about 20 minutes, which could have been shorter if I'd discovered that empty record at the end of my dataset sooner.  The second part took a bit longer, but that was mainly due to the longer runtime of this script...  I don't think this method is the best way to address this issue but I'm drawing a blank on how to solve it properly.
 #+end_preview
 
 * Input
