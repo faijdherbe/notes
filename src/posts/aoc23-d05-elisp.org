@@ -364,7 +364,7 @@ humidity-to-location map:
 
 
 * Part 2
-This part isn't the best solution,  But i kinda don't think its worth it at this moment to tray any harder to fix it... it gave the right answer, so it's good enough.
+This part isn't the best solution,  But I kinda don't think its worth it at this moment to try any harder to fix it... it gave the right answer, so it's good enough.
 #+begin_src elisp :var input=input
 (defun aoc23/parse-seeds (string)
   (let* ((seeds (cadr (string-split string ":" nil " ")))
