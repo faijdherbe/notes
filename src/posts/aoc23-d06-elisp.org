@@ -1,4 +1,4 @@
-e: Advent of Code '23 - day 6
+#+title: Advent of Code '23 - day 6
 #+date: <2023-12-06 Wed>
 
 #+begin_preview
