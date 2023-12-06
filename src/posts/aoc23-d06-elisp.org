@@ -1,7 +1,8 @@
-#+title: Advent of Code '23 - day 6
+e: Advent of Code '23 - day 6
 #+date: <2023-12-06 Wed>
 
 #+begin_preview
+Am easier puzzle this time!  This time I was able to solve it with pure math, with the only loop involved being in the input parser for part 1.  
 #+end_preview
 
 * Input
@@ -20,18 +21,107 @@ Distance:   244   1047   1228   1040
 #+end_example
 
 * Part 1
+#+begin_src elisp :var input=input
+(defun aoc23/parse-input (string)
+  (let* ((lines (string-split (string-trim string)
+                              "\n"))
+         (times (car lines))
+         (times (string-trim (cadr (string-split times
+                                                 ":"))))
+         (times (string-split times
+                              " +"))
+         (times (mapcar 'string-to-number
+                        times))
+         (dists (cadr lines))
+         (dists (string-trim (cadr (string-split dists
+                                                 ":"))))
+         (dists (string-split dists
+                              " +"))
+         (dists (mapcar 'string-to-number
+                        dists))
+         (output '()))
+    
+    (while times
+      (setq output (append output
+                           `((,(car times) . ,(car dists)))))
+      (setq times (cdr times))
+      (setq dists (cdr dists)))
 
-hoogtepunt $(t/2)*(t/2)$
-per x  $x*(t-x)$
-#+begin_src elisp :var input=example
-  (defun aoc23/parse-input (string)
+    output))
+
+(defun aoc23/calc-dist (time-pressed time-available)
+  (* time-pressed (- time-available
+                     time-pressed))
   )
 
-  (defun aoc23/calc-window (available-time min-dist)
-  )
+(defun aoc23/calc-max-dist (time-available)
+  (* (/ time-available 2.0)
+     (/ time-available 2.0)))
+
+(defun aoc23/calc-min-time (time-available min-distance)
+  (floor (1+ (- (/ time-available 2.0)
+                (sqrt (- (aoc23/calc-max-dist time-available)
+                         min-distance))))))
+
+(defun aoc23/calc-number-options (time-available min-distance)
+  (1+ (- time-available
+         (* 2
+            (aoc23/calc-min-time time-available
+                                 min-distance)))))
+(apply '*
+       (mapcar (lambda (c)
+                 (aoc23/calc-number-options (car c) (cdr c)))
+               (aoc23/parse-input input)))
 
 #+end_src
+
+#+RESULTS:
+: 74698
 
 * Part 2
-#+begin_src elisp :var input=example
+  This part only required a different input-parser, yay!
+#+begin_src elisp :var input=input
+(defun aoc23/parse-input (string)
+  (let* ((lines (string-split (string-trim string)
+                              "\n"))
+         (times (car lines))
+         (times (string-trim (cadr (string-split times
+                                                 ":"))))
+         (times (string-split times
+                              " +"))
+        
+         (dists (cadr lines))
+         (dists (string-trim (cadr (string-split dists
+                                                 ":"))))
+         (dists (string-split dists
+                              " +")))
+    `((,(string-to-number (apply 'concat  times)) . ,(string-to-number (apply 'concat dists))))))
+
+(defun aoc23/calc-dist (time-pressed time-available)
+  (* time-pressed (- time-available
+                     time-pressed))
+  )
+
+(defun aoc23/calc-max-dist (time-available)
+  (* (/ time-available 2.0)
+     (/ time-available 2.0)))
+
+(defun aoc23/calc-min-time (time-available min-distance)
+  (floor (1+ (- (/ time-available 2.0)
+                (sqrt (- (aoc23/calc-max-dist time-available)
+                         min-distance))))))
+
+(defun aoc23/calc-number-options (time-available min-distance)
+  (1+ (- time-available
+         (* 2
+            (aoc23/calc-min-time time-available
+                                 min-distance)))))
+(apply '*
+       (mapcar (lambda (c)
+                 (aoc23/calc-number-options (car c) (cdr c)))
+               (aoc23/parse-input input)))
+
 #+end_src
+
+#+RESULTS:
+: 27563421
