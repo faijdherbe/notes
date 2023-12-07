@@ -28,7 +28,7 @@ The complete formula for the answer is as follows:
 answer(t,d)=t-(\lfloor (\frac{t}{2}- \sqrt{((\frac{t}{2})^2) - d} )+1 \rfloor) *2)+1
 \end{equation}
 
-I'm no mathemitian so it might be optimized somehow, but I don't know.
+I'm no mathematician so it might be optimized somehow, but I don't know.
 
 #+begin_src elisp :var input=input
 (defun aoc23/parse-input (string)
