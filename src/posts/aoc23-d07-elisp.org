@@ -1024,21 +1024,49 @@ Q7289 138
 #+begin_src elisp :var input=example
   (defun aoc23/get-answer (input)
     (let* ((hands (string-split input "\n"))
-	   (hands (mapcat 'aoc23/string-to-hand))
-	   (answer 0)
-	   (rank (length hands)))
+  	 (hands (mapcat 'aoc23/string-to-hand))
+  	 (answer 0)
+  	 (rank (length hands)))
       (sort hands 'aoc23/sort-hands)
       (dolist (hand hands)
-	(setq answer (+ answer (* (aoc23/score-hand hand rank)
-	)
+        (setq answer (+ answer (* rank (aoc23/score-hand hand))))
+        (setq rank (1- rank)))
       answer)
 
-  (defun aoc23/string-to-hand (s))
-  (defun aoc23/string-to-cards (s))
-  (defun aoc23/sort-cards (a b))
-  (defun aoc23/sort-hands (a b))
+    (defun aoc23/string-to-hand (s)
+      (let* ((segments (string-split (string-trim s) " "))
+  	   (score (string-to-number (cadr segments)))
+  	   (cards (mapcar 'aoc23/char-to-card (car segments)))
+  	   (cards (aoc23/sort-cards cards))
+  	   (type (aoc23/get-hand-type cards)))
+      `((:cards . ,cards)
+        (:score . ,score)
+        (:type . ,type))))
 
-  (get-answer (string-trim input))
+    (defun aoc23/char-to-card (c)
+      (let ((c (char-to-string c)))
+        (cond ((string= c "T") 10)
+  	    ((string= c "J") 11)
+  	    ((string= c "Q") 12)
+  	    ((string= c "K") 13)
+  	    ((string= c "A") 14)
+  	    (t (string-to-number c)))))
+
+    (defun aoc23/get-hand-type (cards))
+    (defun aoc23/sort-cards (cards)
+      (sort cards (lambda (a b)
+  		  (or (= a b)
+  		      (< a b)))))
+  	  
+        
+  	
+    (defun aoc23/sort-hands (a b))
+
+    (get-answer (string-trim input))
+    (assoc 5 '((2 . (2)) (3. (3 3)) (13 .(13))))
+    
+    (aoc23/string-to-hand "32T3K 756")
+
 #+end_src
 
 * Part 2
