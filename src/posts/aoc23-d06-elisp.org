@@ -25,7 +25,7 @@ I was able to reduce the calculation into a single formula without loops, except
 
 The complete formula for the answer is as follows:
 \begin{equation}
-answer(t,d)=t-(\lfloor (\frac{t}{2}- \sqrt{(\frac{t}{2})^2 - d} )+1 \rfloor) *2)+1
+answer(t,d)=t-\left(\lfloor \left(\frac{t}{2}- \sqrt{\left(\frac{t}{2}\right)^2 - d}\right) +1 \rfloor *2\right)+1
 \end{equation}
 
 I'm no mathematician so it might be optimized somehow, but I don't know.
