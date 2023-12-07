@@ -21,7 +21,7 @@ Distance:   244   1047   1228   1040
 #+end_example
 
 * Part 1
-I was able to reduce the calculation into a single formula without loops, except for input parsing and adding everyrhi g together ofcourse.  I've split the formula into several methods as I expected a twist for part two.
+I was able to reduce the calculation into a single formula without loops, except for input parsing and adding everything together of course.  I've split the formula into several methods as I expected a twist for part two.
 
 The complete formula for the answer is as follows:
 \begin{equation}
@@ -77,10 +77,14 @@ I'm no mathemitian so it might be optimized somehow, but I don't know.
          (* 2
             (aoc23/calc-min-time time-available
                                  min-distance)))))
-(apply '*
-       (mapcar (lambda (c)
-                 (aoc23/calc-number-options (car c) (cdr c)))
-               (aoc23/parse-input input)))
+
+(defun aoc23/get-answer (input)
+  (apply '*
+         (mapcar (lambda (c)
+                   (aoc23/calc-number-options (car c) (cdr c)))
+                 (aoc23/parse-input input))))
+
+(aoc23/get-answer input)
 
 #+end_src
 
@@ -88,7 +92,7 @@ I'm no mathemitian so it might be optimized somehow, but I don't know.
 : 74698
 
 * Part 2
-  This part only required a different input-parser, yay!
+  This part only required a different input-parser, yay!  
 #+begin_src elisp :var input=input
 (defun aoc23/parse-input (string)
   (let* ((lines (string-split (string-trim string)
@@ -106,29 +110,7 @@ I'm no mathemitian so it might be optimized somehow, but I don't know.
                               " +")))
     `((,(string-to-number (apply 'concat  times)) . ,(string-to-number (apply 'concat dists))))))
 
-(defun aoc23/calc-dist (time-pressed time-available)
-  (* time-pressed (- time-available
-                     time-pressed))
-  )
-
-(defun aoc23/calc-max-dist (time-available)
-  (* (/ time-available 2.0)
-     (/ time-available 2.0)))
-
-(defun aoc23/calc-min-time (time-available min-distance)
-  (floor (1+ (- (/ time-available 2.0)
-                (sqrt (- (aoc23/calc-max-dist time-available)
-                         min-distance))))))
-
-(defun aoc23/calc-number-options (time-available min-distance)
-  (1+ (- time-available
-         (* 2
-            (aoc23/calc-min-time time-available
-                                 min-distance)))))
-(apply '*
-       (mapcar (lambda (c)
-                 (aoc23/calc-number-options (car c) (cdr c)))
-               (aoc23/parse-input input)))
+(aoc23/get-answer input)
 
 #+end_src
 
