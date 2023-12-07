@@ -95,20 +95,16 @@ I'm no mathematician so it might be optimized somehow, but I don't know.
   This part only required a different input-parser, yay!  
 #+begin_src elisp :var input=input
 (defun aoc23/parse-input (string)
-  (let* ((lines (string-split (string-trim string)
-                              "\n"))
-         (times (car lines))
-         (times (string-trim (cadr (string-split times
-                                                 ":"))))
-         (times (string-split times
-                              " +"))
-        
-         (dists (cadr lines))
-         (dists (string-trim (cadr (string-split dists
-                                                 ":"))))
-         (dists (string-split dists
-                              " +")))
-    `((,(string-to-number (apply 'concat  times)) . ,(string-to-number (apply 'concat dists))))))
+  (let* ((lines (string-split (string-trim string) "\n"))
+         (parse (lambda (input)
+                  (let* ((output input)
+                         (output (string-trim (cadr (string-split output ":"))))
+                         (output (string-split output " +"))
+                         (output (apply 'concat output)))
+                    (string-to-number output))))
+         (times (funcall parse (car lines)))
+         (dists (funcall parse (cadr lines))))
+      `((,times . ,dists))))
 
 (aoc23/get-answer input)
 
