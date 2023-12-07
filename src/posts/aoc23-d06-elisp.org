@@ -1,8 +1,5 @@
 #+title: Advent of Code '23 - day 6
 #+date: <2023-12-06 Wed>
-\usepackage{mathtools}
-\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
-
 
 #+begin_preview
 Am easier puzzle this time!  This time I was able to solve it with pure math, with the only loop involved being in the input parser for part 1.  
@@ -24,29 +21,11 @@ Distance:   244   1047   1228   1040
 #+end_example
 
 * Part 1
-I was able to reduce the calculation into a single formula without loops, except for input parsing and adding everyrhi g together ofcourse.  i've split the formula into several methods as I expected a twist for part two.
+I was able to reduce the calculation into a single formula without loops, except for input parsing and adding everyrhi g together ofcourse.  I've split the formula into several methods as I expected a twist for part two.
 
-Looking at the first example written out I recognized a bell curve.  Which means there is an apex point somewhere around the middle.  Running a few tests (with a little added round up/down).
-
+The complete formula for the answer is as follows:
 \begin{equation}
-distmax(tmax) = (\frac{t}{2})^2
-\end{equation}
-
-It matched perfectly which meant that we had already found 1 part of our equation.  To get to our answer we had to find the point where the time we pressed the button created enough distance to pass the distance threshold.  It had to be something that is the calculates the time difference between the minimum and maximum distance.  Looking at our previous formula I had the feeling I could use the square root here.  Giving it a spin I found that taking the square root of the difference between the max distance and the minimum distance matched up with the examples pretty well.  
- The value I got was the time we needed to press the button before releasing it.  
-
-\begin{equation}
-timemin(time, distmin) = \lfloor (\frac{time}{2}- \sqrt{distmax - distmin} )+1 \rfloor
-\end{equation}
-
-\begin{equation}
-options(timeavailable, timemin)=time-(timemin *2)+1
-\end{equation}
-
-
-Were we to combine all equations into one it would look like the following:
-\begin{equation}
-options(t,d)=t-(\lfloor (\frac{t}{2}- \sqrt{((\frac{t}{2})^2) - d} )+1 \rfloor) *2)+1
+answer(t,d)=t-(\lfloor (\frac{t}{2}- \sqrt{((\frac{t}{2})^2) - d} )+1 \rfloor) *2)+1
 \end{equation}
 
 I'm no mathemitian so it might be optimized somehow, but I don't know.
