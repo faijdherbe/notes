@@ -9,7 +9,7 @@
 #+name: example
 #+begin_example
 #+end_example
-** Input
+** Input                                                           :noexport:
 #+name: input
 #+begin_example
 #+end_example
