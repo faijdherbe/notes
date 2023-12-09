@@ -2,7 +2,7 @@
 #+date: <2023-12-06 Wed>
 
 #+begin_preview
-Am easier puzzle this time!  This time I was able to solve it with pure math, with the only loop involved being in the input parser for part 1.  
+An easier puzzle this time!  This time I was able to solve it with pure math, with the only loop involved being in the input parser for part 1.  
 #+end_preview
 
 * Input

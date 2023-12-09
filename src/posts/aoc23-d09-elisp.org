@@ -2,7 +2,7 @@
 #+date: <2023-12-09 Sat>
 
 #+begin_preview
-My elisp skill are growing.  Writing code goes quicker every time.  The first part took a bit longer as I added the wrong results, but it didn't take very long to get there.  For part two I only had to add a single =reverse=. 
+My elisp skill are growing.  Writing code goes quicker every time.  The first part took a bit longer as I added the wrong results, but it didn't take very long to get there.  For part two I only had to add a single ~reverse~. 
 #+end_preview
 
 * Input
