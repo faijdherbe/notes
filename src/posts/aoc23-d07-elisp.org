@@ -1021,47 +1021,178 @@ Q7289 138
 #+end_example
 
 * Part 1
-#+begin_src elisp :var input=example
-  (defun aoc23/get-answer (input)
-    (let* ((hands (string-split input "\n"))
-  	 (hands (mapcat 'aoc23/string-to-hand))
-  	 (answer 0)
-  	 (rank (length hands)))
-      (sort hands 'aoc23/sort-hands)
-      (dolist (hand hands)
-        (setq answer (+ answer (* rank (aoc23/score-hand hand))))
-        (setq rank (1- rank)))
-      answer)
+#+begin_src elisp :var input=input
+(defun aoc23/char-to-card (c)
+  (string-search (char-to-string c) "23456789TJQKA"))
 
-    (defun aoc23/string-to-hand (s)
-      (let* ((segments (string-split (string-trim s) " "))
-  	   (score (string-to-number (cadr segments)))
-  	   (cards (mapcar 'aoc23/char-to-card (car segments)))
-  	   (type nil))
-      `((:cards . ,cards)
-        (:score . ,score)
-        (:type . ,type))))
+(defun aoc23/string-to-hand (string)
+  (let* ((segs (string-split string " "))
+         (cards (car segs))
+         (cards (mapcar 'aoc23/char-to-card cards))
+         (bid (string-to-number (cadr segs))))
+    `((:cards . ,cards)
+      (:bid . ,bid))))
 
-    (defun aoc23/char-to-card (c)
-      (string-search (char-to-string c) "23456789TJQKA"))
+(defun aoc23/make-set-score (cards)
+  (let* ((map (make-hash-table))
+         (out 0))
+    (dolist (card cards)
+      (let ((c (gethash card map 0)))
+        (setq c (1+ c))
+        (puthash card c map)))
 
-    (defun aoc23/get-hand-type (cards))
-    (defun aoc23/sort-cards (cards)
-      (sort cards (lambda (a b)
-  		  (or (= a b)
-  		      (< a b)))))
-  	  
-        
-  	
-    (defun aoc23/sort-hands (a b))
+    (let ((scores (sort (hash-table-values map) '>)))
+      (dolist (v scores)
+        (setq out (+ (* 10 out)
+                     v)))
+      (dotimes (i (- 5 (length scores)))
+        (setq out (* 10 out))))
+    out
+  ))
 
-    (get-answer (string-trim input))
-    (assoc 5 '((2 . (2)) (3. (3 3)) (13 .(13))))
-    
-    (aoc23/string-to-hand "32T3K 756")
+(defun aoc23/compare-hands (a b)
+  (let ((aa a)
+        (bb b))
+    (while (and (car aa)
+                (car bb)
+                (= (car aa) (car bb)))
+      (setq aa (cdr aa))
+      (setq bb (cdr bb)))
+    (> (car aa) (car bb))))
 
+(defun aoc23/sort-hands (a b)
+  (let* ((ca (cdr (assoc :cards a)))
+         (cb (cdr (assoc :cards b)))
+         (sca (aoc23/make-set-score ca))
+         (scb (aoc23/make-set-score cb)))
+    (let ((x (if (= sca scb)
+                 (aoc23/compare-hands ca cb)
+               (> sca scb))))
+      (message "%S(%S) vs %S(%S) : %S" ca sca cb scb x)
+      x)))
+
+
+
+(defun hand-to-string (hand)
+  (concat "|"
+          (apply 'concat (mapcar (lambda (c)
+                                   (substring "23456789TJQKA" c (1+ c)))
+                                 (cdr (assoc :cards hand))))
+          " "
+          (number-to-string (cdr (assoc :bid hand)))
+          "|"))
+
+(let* ((score 0)
+       (hands (sort (mapcar 'aoc23/string-to-hand (string-split (string-trim input) "\n"))
+                    'aoc23/sort-hands))
+       (rank (length hands)))
+  (message (apply 'concat (mapcar 'hand-to-string hands)))
+  (dolist (hand hands)
+    (setq score (+ score
+                   (* rank (cdr (assoc :bid hand)))))
+    (setq rank (1- rank)))
+  score)
+  
 #+end_src
+
+#+RESULTS:
+: 250120186
 
 * Part 2
-#+begin_src elisp :var input=example
+#+begin_src elisp :var input=input
+(defun aoc23/char-to-card (c)
+  (string-search (char-to-string c) "J23456789TQKA"))
+
+(defun aoc23/string-to-hand (string)
+  (let* ((segs (string-split string " "))
+         (cards (car segs))
+         (cards (mapcar 'aoc23/char-to-card cards))
+         (bid (string-to-number (cadr segs))))
+    `((:cards . ,cards)
+      (:bid . ,bid))))
+
+(defun aoc23/replace-jokers (cards card)
+  ;(message "replace %S" card)
+  (mapcar (lambda (c)
+            (if (= c 0)
+                card
+              c))
+          cards))
+   
+    
+
+(defun aoc23/make-set-score-with-jokers (cards)
+;      (error "%S" (mapcar (lambda (c) (if (= c 0) "Y" c)) cards))
+  (let ((highest 0))
+    (dolist (card cards)
+      (let* ((adjusted-cards (aoc23/replace-jokers cards card))
+             (score (aoc23/make-set-score adjusted-cards)))
+        ;(message "%S > %S" cards adjusted-cards)
+        (when (< highest score)
+          (setq highest score))))
+    highest))
+
+(defun aoc23/make-set-score (cards)
+  (let* ((map (make-hash-table))
+         (out 0))
+    (dolist (card cards)
+      (let ((c (gethash card map 0)))
+        (setq c (1+ c))
+        (puthash card c map)))
+    
+    (let ((scores (sort (hash-table-values map) '>)))
+      (dolist (v scores)
+        (setq out (+ (* 10 out)
+                     v)))
+      (dotimes (i (- 5 (length scores)))
+        (setq out (* 10 out))))
+    out
+  ))
+
+(defun aoc23/compare-hands (a b)
+  (let ((aa a)
+        (bb b))
+    (while (and (car aa)
+                (car bb)
+                (= (car aa) (car bb)))
+      (setq aa (cdr aa))
+      (setq bb (cdr bb)))
+    (> (car aa) (car bb))))
+
+(defun aoc23/sort-hands (a b)
+  (let* ((ca (cdr (assoc :cards a)))
+         (cb (cdr (assoc :cards b)))
+         (sca (aoc23/make-set-score-with-jokers ca))
+         (scb (aoc23/make-set-score-with-jokers cb)))
+    (let ((x (if (= sca scb)
+                 (aoc23/compare-hands ca cb)
+               (> sca scb))))
+      ;(message "%S(%S) vs %S(%S) : %S" ca sca cb scb x)
+      x)))
+
+
+
+(defun hand-to-string (hand)
+  (concat "|"
+          (apply 'concat (mapcar (lambda (c)
+                                   (substring "J23456789TQKA" c (1+ c)))
+                                 (cdr (assoc :cards hand))))
+          " "
+          (number-to-string (cdr (assoc :bid hand)))
+          "|"))
+
+(let* ((score 0)
+       (hands (sort (mapcar 'aoc23/string-to-hand (string-split (string-trim input) "\n"))
+                    'aoc23/sort-hands))
+       (rank (length hands)))
+  ;(message (apply 'concat (mapcar 'hand-to-string hands)))
+  (dolist (hand hands)
+    (setq score (+ score
+                   (* rank (cdr (assoc :bid hand)))))
+    (setq rank (1- rank)))
+  score)
+  
 #+end_src
+
+#+RESULTS:
+: 250665248
