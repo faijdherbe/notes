@@ -2,6 +2,7 @@
 #+date: <2023-12-08 Fri>
 
 #+begin_preview
+The first part was pretty straightforward, just follow the path and trace your steps.  The second part really screamed that brute forcing isn't the way here.  I knew what numbers I needed, just not how to calculate those numbers so these (LCM and GCD) I had to look up.  
 #+end_preview
 
 * Input
@@ -34,7 +35,7 @@ LR
 XXX = (XXX, XXX)
 #+end_example
 
-** Input
+** Input                                                           :noexport:
 #+name: input
 #+begin_example
 LRLRLRLRRLRRRLRLRLRRRLLRRLRRLRRLLRRLRRLRLRRRLRRLLRRLRRRLRRLRRRLRRRLLLRRLLRLLRRRLLRRLRLLRLLRRRLLRRLRRLRRRLRRLRLRRLRRLRLLRLRRRLRLRRLRLLRRLRRRLRRLRLRRLLLRRLRRRLRRRLRRLRRRLRLRRLRRLRRRLRRLRRLRRLRRLRRRLLRRRLLLRRRLRRLRRRLLRRRLRRLRRLLLLLRRRLRLRRLRRLLRRLRRLRLRLRRRLRRRLRRLLLRRRR
