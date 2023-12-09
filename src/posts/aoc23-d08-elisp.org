@@ -834,7 +834,7 @@ QXB = (KRM, SVX)
 : 12643
 
 * Part 2
-#+begin_src elisp :var input=example2
+#+begin_src elisp :var input=input
   (defun aoc23/parse-input (string)
     (let* ((string (string-trim string))
 	   (segments (string-split string "\n\n"))
@@ -864,6 +864,13 @@ QXB = (KRM, SVX)
 		   `(,(elt elems 1) .  ,(elt elems 2))
 		   map)))
       map))
+  (defun gcd (n m)
+    (cond ((< n m) (gcd m n))
+	  ((= m 0) n)
+	  (t (gcd m (% n m)))))
+
+  (defun lcm (n m)
+    (/ (* n m) (gcd n m)))
 
   (let* ((map (aoc23/parse-input input))
 	 (steps 0)
@@ -871,21 +878,23 @@ QXB = (KRM, SVX)
 	 (instructions (cdr (assoc :instructions map)))
 	 (startnodes (cdr (assoc :startnodes map)))
 	 (num (length startnodes)))
-    (while (not (length= (seq-filter 'aoc23/endp
-				     startnodes)
-			 num))
-      (setq startnodes (mapcar (lambda (node)
-				 (let ((crossroad (gethash node nodes))
-				       (dir (elt instructions (% steps (length instructions)))))
-				   (if (string= "L" dir)
-				       (car crossroad)
-				     (cdr crossroad))))
-			       startnodes))
+
+    (setq steps (mapcar (lambda (node)
+			  (let ((steps 0))
+	(while (not (aoc23/endp node))
+      (let ((crossroad (gethash node nodes))
+	    (dir (elt instructions (% steps (length instructions)))))
+	(setq node (if (string= "L" dir)
+		       (car crossroad)
+		     (cdr crossroad))))
 
       (setq steps (1+ steps)))
-    steps)
+	steps)) startnodes))
+    (setq steps (sort steps '>))
+  
+    (seq-reduce 'lcm (cdr steps) (car steps)))
 #+end_src
 
 #+RESULTS:
-: 6
+: 13133452426987
 
