@@ -1,0 +1,92 @@
+#+title: Advent of Code '23 - day 11
+#+date: <2023-12-11 ma>
+
+#+begin_preview
+#+end_preview
+
+* Input
+** Example
+#+name: example
+#+begin_example
+...#......
+.......#..
+#.........
+..........
+......#...
+.#........
+.........#
+..........
+.......#..
+#...#.....
+#+end_example
+
+** Input                                                           :noexport:
+#+name: input
+#+begin_example
+#+end_example
+
+* Part 1
+#+begin_src elisp :var input=example
+(defun aoc23/parse-input (string)
+   (let* ((lines (string-split string "\n" t))
+          (lines (aoc23/expand-galaxy lines))
+          (lines (aoc23/rotate-map lines))
+          (lines (aoc23/expand-galaxy lines))
+          (lines (aoc23/rotate-map lines))
+          (lines (aoc23/rotate-map lines))
+          (lines (aoc23/rotate-map lines)))
+     lines))
+
+(defun aoc23/expand-galaxy (lines)
+  (apply 'append (mapcar (lambda (line)
+            (if (string-match-p "^\\.+$" line)
+                (cons line (cons line nil))
+              (cons line nil)))
+          lines)))
+
+(defun aoc23/rotate-map (lines &optional forward-rotation)
+  (let* ((dw (length lines))
+         (dh (length (car lines)))
+         (src (string-join lines "\n"))
+         (dst '()))
+    (dotimes (dy dh)
+      (let ((line '()))
+        (dotimes (dx dw)
+          (let ((sx dy)
+                (sy dx))
+            (setq line (append line (list (elt (elt lines sy) sx))))
+            ))
+
+        (setq dst (append dst (list (apply 'concat (mapcar 'char-to-string line)))))))
+    dst))
+     
+(defun aoc23/find-galaxies (map)
+  (let ((h (length map))
+        (w (length (car map)))
+        (galaxies '()))
+    (dotimes (y h)
+      (dotimes (x w)
+        (unless (= ?. (elt (elt map y) x))
+          (setq galaxies (append galaxies (list (cons x y)))))))
+    galaxies))
+          
+(defun aoc23/distances (nodes)
+  (apply 'sum
+         (seq-reduce (lambda (a b)
+                       (+ (abs (- (car b) (car a)))
+                          (abs (- (cdr b) (cdr a)))))
+                     
+                     nodes
+                     (car nodes))))
+
+(aoc23/distances 
+ (aoc23/find-galaxies
+  (aoc23/parse-input input)))
+#+end_src
+
+#+RESULTS:
+: 748
+
+* Part 2
+#+begin_src elisp :var input=example
+#+end_src
