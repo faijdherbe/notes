@@ -1128,48 +1128,22 @@
           (cons 'candidates (aoc23/springs-to-candidates springs))
 	  (cons 'pattern (aoc23/checks-to-pattern checks)))))
 
-(defun aoc23/springs-to-candidates (springs)
-  (let ((i nil)
-      (m nil)
-      (c nil)
-      (b 0)
-      (base 0))
-  
-  (while (setq i (string-match (rx "?") (reverse springs) (if i (1+ i) 0)))
-    (setq m (cons (lsh 1 i) m)))
-  (setq i nil)
-  (while (setq i (string-match (rx "#") (reverse springs) (if i (1+ i) 0)))
-    (setq base (logior base (lsh 1 i))))
-  (cons base (build-patterns m base))))
+(defun aoc23/springs-to-candidates (input)
+  (let* ((input (split-string input " " t))
+        (mask (car input))
+        (groups (mapcar 'string-to-number (split-string (cadr input) "," t))))
+    (aoc23/--build-pattern groups (length mask))
+    ))
+(defun aoc23/--build-pattern (groups max-length)
+  groups)
 
-(defun build-patterns (candidates base)
-  (let ((m candidates)
-        (out '()))
-    (while m
-      (let ((n (logior base (car m))))
-        (setq m (cdr m))
-        (setq out (cons n out))
-        (when m
-          (setq out (append out (build-patterns m n))))
-      ))
-    out))
+(aoc23/springs-to-candidates "?###???????? 3,2,1")
 
 (defun aoc23/springs-to-number (in low)
   (let* ((in (string-replace "?" (if (eq low 'low) "#" ".") in))
 	 (in (string-replace "." "0" in))
 	 (in (string-replace "#" "1" in)))
     (string-to-number in 2)))
-
-(defun aoc23/checks-to-pattern (check)
-  (let ((c (mapcar 'string-to-number (split-string check "," t)))
-	(matches '()))
-    (apply 'concat `("^0*" 
-		     ,(string-join 
-		       (mapcar (lambda (n)
-				 (format "1\\{%d\\}" n))
-			       c)
-		       "0+")
-		     "0*$"))))
 
 (defun int-to-binary-string (i)
   "convert an integer into it's binary representation in string format"
@@ -1185,9 +1159,8 @@
   (let ((s (int-to-binary-string number))
         (p (alist-get 'pattern check)))
     (string-match-p p s)))
-		    
 
-(defun aoc23/part-1 (input)
+(defun aoc23/part-2 (input)
   (let ((in (string-split input "\n" t))
 	(sum 0))
     (dolist (line in)
@@ -1202,5 +1175,7 @@
     sum))
 
 
-(aoc23/part-1 input)
+(aoc23/part-2 input)
+
+
 #+end_src
