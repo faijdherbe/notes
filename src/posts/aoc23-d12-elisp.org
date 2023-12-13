@@ -1021,70 +1021,186 @@
 .#?????..???????.? 6,7
 #+end_example
 
+
 * Part 1
-#+begin_src elisp :var input=example
-  (defun aoc23/convert-input (line)
-    (let* ((segs (string-split line " " t))
-	   (springs (car segs))
-	   (checks (cadr segs)))
-      (list (cons 'low (aoc23/springs-to-number springs 'low))
-	    (cons 'high (aoc23/springs-to-number springs 'high))
-	    (cons 'pattern (aoc23/checks-to-pattern checks)))))
+#+begin_src elisp :var input=input
+(defun aoc23/convert-input (line)
+  (let* ((segs (string-split line " " t))
+	 (springs (car segs))
+	 (checks (cadr segs)))
+    (list (cons 'low (aoc23/springs-to-number springs 'low))
+	  (cons 'high (aoc23/springs-to-number springs 'high))
+          (cons 'candidates (aoc23/springs-to-candidates springs))
+	  (cons 'pattern (aoc23/checks-to-pattern checks)))))
 
-  (defun aoc23/springs-to-number (in low)
-    (let* ((in (string-replace "?" (if (eq low 'low) "#" ".") in))
-	   (in (string-replace "." "1" in))
-	   (in (string-replace "#" "0" in)))
-      (string-to-number in 2)))
+(defun aoc23/springs-to-candidates (springs)
+  (let ((i nil)
+      (m nil)
+      (c nil)
+      (b 0)
+      (base 0))
+  
+  (while (setq i (string-match (rx "?") (reverse springs) (if i (1+ i) 0)))
+    (setq m (cons (lsh 1 i) m)))
+  (setq i nil)
+  (while (setq i (string-match (rx "#") (reverse springs) (if i (1+ i) 0)))
+    (setq base (logior base (lsh 1 i))))
+  (cons base (build-patterns m base))))
 
-  (defun aoc23/checks-to-pattern (check)
-    (let ((c (mapcar 'string-to-number (split-string check "," t)))
-	  (matches '()))
-      (apply 'concat `("^1*" 
-		       ,(string-join 
-			 (mapcar (lambda (n)
-				   (format "0\\{%d\\}" n))
-				 c)
-			 "1+")
-		       "1*$"))))
+(defun build-patterns (candidates base)
+  (let ((m candidates)
+        (out '()))
+    (while m
+      (let ((n (logior base (car m))))
+        (setq m (cdr m))
+        (setq out (cons n out))
+        (when m
+          (setq out (append out (build-patterns m n))))
+      ))
+    out))
 
-  ;(string-match-p (aoc23/checks-to-pattern "1,1,3") "101010001")
+(defun aoc23/springs-to-number (in low)
+  (let* ((in (string-replace "?" (if (eq low 'low) "#" ".") in))
+	 (in (string-replace "." "0" in))
+	 (in (string-replace "#" "1" in)))
+    (string-to-number in 2)))
 
-  (defun int-to-binary-string (i)
-    "convert an integer into it's binary representation in string format"
-    (let ((res ""))
-      (while (not (= i 0))
-	(setq res (concat (if (= 1 (logand i 1)) "1" "0") res))
-	(setq i (lsh i -1)))
-      (if (string= res "")
-	  (setq res "0"))
-      res))
+(defun aoc23/checks-to-pattern (check)
+  (let ((c (mapcar 'string-to-number (split-string check "," t)))
+	(matches '()))
+    (apply 'concat `("^0*" 
+		     ,(string-join 
+		       (mapcar (lambda (n)
+				 (format "1\\{%d\\}" n))
+			       c)
+		       "0+")
+		     "0*$"))))
 
-  (defun aoc23/spring-config-p (number check)
-    (let ((low (alist-get 'low check)))
-      (and (= low (logand number low))
-	   (string-match-p (alist-get 'pattern check)
-			   (int-to-binary-string number)))))
+(defun int-to-binary-string (i)
+  "convert an integer into it's binary representation in string format"
+  (let ((res ""))
+    (while (not (= i 0))
+      (setq res (concat (if (= 1 (logand i 1)) "1" "0") res))
+      (setq i (lsh i -1)))
+    (if (string= res "")
+	(setq res "0"))
+    res))
 
-  (defun aoc23/part-1 (input)
+(defun aoc23/spring-config-p (number check)
+  (let ((s (int-to-binary-string number))
+        (p (alist-get 'pattern check)))
+    (string-match-p p s)))
+		    
+
+(defun aoc23/part-1 (input)
   (let ((in (string-split input "\n" t))
 	(sum 0))
     (dolist (line in)
       (let* ((m (aoc23/convert-input line))
 	     (i (alist-get 'low m))
-	     (last (alist-get 'high m)))
-	(while (< i last)
-	  (when (aoc23/spring-config-p i m)
+	     (last (alist-get 'high m))
+             (c (alist-get 'candidates m)))
+	(dolist (s c)
+	  (when (aoc23/spring-config-p s m)
 	    (setq sum (1+ sum)))
 	  (setq i (1+ i)))))
     sum))
 
-  (aoc23/part-1 "????.######..#####. 1,6,5")
+
+(aoc23/part-1 input)
 #+end_src
 
 #+RESULTS:
-: 36
+: 7541
 
 * Part 2
 #+begin_src elisp :var input=example
+(defun aoc23/convert-input (line)
+  (let* ((segs (string-split line " " t))
+         (segs (mapcar (lambda (s)
+                         (apply 'concat (make-list 5 s)))
+                       segs))
+
+	 (springs (car segs))
+	 (checks (cadr segs)))
+    (list (cons 'low (aoc23/springs-to-number springs 'low))
+	  (cons 'high (aoc23/springs-to-number springs 'high))
+          (cons 'candidates (aoc23/springs-to-candidates springs))
+	  (cons 'pattern (aoc23/checks-to-pattern checks)))))
+
+(defun aoc23/springs-to-candidates (springs)
+  (let ((i nil)
+      (m nil)
+      (c nil)
+      (b 0)
+      (base 0))
+  
+  (while (setq i (string-match (rx "?") (reverse springs) (if i (1+ i) 0)))
+    (setq m (cons (lsh 1 i) m)))
+  (setq i nil)
+  (while (setq i (string-match (rx "#") (reverse springs) (if i (1+ i) 0)))
+    (setq base (logior base (lsh 1 i))))
+  (cons base (build-patterns m base))))
+
+(defun build-patterns (candidates base)
+  (let ((m candidates)
+        (out '()))
+    (while m
+      (let ((n (logior base (car m))))
+        (setq m (cdr m))
+        (setq out (cons n out))
+        (when m
+          (setq out (append out (build-patterns m n))))
+      ))
+    out))
+
+(defun aoc23/springs-to-number (in low)
+  (let* ((in (string-replace "?" (if (eq low 'low) "#" ".") in))
+	 (in (string-replace "." "0" in))
+	 (in (string-replace "#" "1" in)))
+    (string-to-number in 2)))
+
+(defun aoc23/checks-to-pattern (check)
+  (let ((c (mapcar 'string-to-number (split-string check "," t)))
+	(matches '()))
+    (apply 'concat `("^0*" 
+		     ,(string-join 
+		       (mapcar (lambda (n)
+				 (format "1\\{%d\\}" n))
+			       c)
+		       "0+")
+		     "0*$"))))
+
+(defun int-to-binary-string (i)
+  "convert an integer into it's binary representation in string format"
+  (let ((res ""))
+    (while (not (= i 0))
+      (setq res (concat (if (= 1 (logand i 1)) "1" "0") res))
+      (setq i (lsh i -1)))
+    (if (string= res "")
+	(setq res "0"))
+    res))
+
+(defun aoc23/spring-config-p (number check)
+  (let ((s (int-to-binary-string number))
+        (p (alist-get 'pattern check)))
+    (string-match-p p s)))
+		    
+
+(defun aoc23/part-1 (input)
+  (let ((in (string-split input "\n" t))
+	(sum 0))
+    (dolist (line in)
+      (let* ((m (aoc23/convert-input line))
+	     (i (alist-get 'low m))
+	     (last (alist-get 'high m))
+             (c (alist-get 'candidates m)))
+	(dolist (s c)
+	  (when (aoc23/spring-config-p s m)
+	    (setq sum (1+ sum)))
+	  (setq i (1+ i)))))
+    sum))
+
+
+(aoc23/part-1 input)
 #+end_src
