@@ -255,21 +255,9 @@
 	  (setq columns (append columns (list i)))))
       (list columns rows)))
 
-  (defun aoc23/rotate-map (lines &optional forward-rotation)
-    (let* ((dw (length lines))
-	   (dh (length (car lines)))
-	   (src (string-join lines "\n"))
-	   (dst '()))
-      (dotimes (dy dh)
-	(let ((line '()))
-	  (dotimes (dx dw)
-	    (let ((sx dy)
-		  (sy dx))
-	      (setq line (append line (list (elt (elt lines sy) sx))))
-	      ))
 
-	  (setq dst (append dst (list (apply 'concat (mapcar 'char-to-string line)))))))
-      dst))
+
+
 
   (defun aoc23/find-galaxies (map)
     (let ((h (length map))
