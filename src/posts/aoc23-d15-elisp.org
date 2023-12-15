@@ -25,16 +25,28 @@ tsqxjb=8,hr=6,dtv=1,chhq=8,lcrbv=6,szm-,mx-,xj=4,dmm-,prdgn-,cnk-,tl=5,zhc-,xvcp
 
 #+begin_src elisp :var input=input
   (apply '+ (mapcar (lambda (s)
-  		    (seq-reduce (lambda (v m)
-  				  (% (* 17 (+ v m)) 256))
-  				s
-  				0))
-  		  (string-split input (rx (1+ (or "," "\n"))) t)))
+  		    (seq-reduce (lambda (v m) (% (* 17 (+ v m)) 256)) s 0))
+  		  (string-split input "," t)))
 #+end_src
 
 #+RESULTS:
-: 498538
+: 498548
 
 * Part 2
 #+begin_src elisp :var input=example
+
+  					;(seq-reduce (lambda (v m) (% (* 17 (+ v m)) 256)) s 0))
+
+  (mapcar (lambda (seq)
+  	  (seq-reduce (lambda (v c)
+  			(cond ((not c)
+  			       (cons (list v) nil))
+  			      ((= v ?-)
+  			       (cons (car c) ?-))
+  			      ((and (= ?= (cdr c)) (>= v ?0) (<= v ?9))
+  			       (cons (car c) (- v ?0)))
+  			      ((= ?= v)
+  			       (cons (car c) ?=))))
+  		      seq nil))
+  	(string-split input "," t))
 #+end_src
