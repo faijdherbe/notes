@@ -29,9 +29,28 @@
 ** TODO project.el (projecctile?)
 
 ** TODO treemacs
+#+begin_src emacs-lisp
+  (use-package treemacs
+    :ensure
+    :straight t
+    :config (setq treemacs-width (if (display-graphic-p)
+  				   35
+  				 20)))
+    
+  (use-package treemacs-magit
+    :ensure
+    :after (treemacs magit)
+    :straight t)
+#+end_src
 
 * language specific
 ** PHP
+*** PHP mode
+#+begin_src emacs-lisp
+  (use-package php-mode
+    :ensure
+    :straight t)
+#+end_src
 *** Eglot config
 #+begin_src emacs-lisp
 
