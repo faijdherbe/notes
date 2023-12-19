@@ -8,10 +8,45 @@
   :ensure t)
 #+end_src
 
-** TODO eglot (LSP?)
+** TODO eglot
+#+begin_src emacs-lisp
+(use-package eglot
+  :ensure
+  :straight t
+  :bind (:map eglot-mode-map ("C-c e = =" . eglot-format-buffer)
+              ("C-c e r r" . eglot-rename)
+              ("C-c e g i" . eglot-find-implementation)
+              ("C-c e g d" . eglot-find-declaration)
+              ("C-c e g g" . eglot-find-typeDefinition)
+              ("C-c e a o" . eglot-code-action-organize-imports)
+              ("C-c e a a" . eglot-code-actions))
+  )
+                                        ;(with-eval-after-load "eglot"
+                                        ;  (add-to-list 'eglot-server-programs '(php-mode "phpstan")))
+
+#+end_src
+
 ** TODO project.el (projecctile?)
+
+** TODO treemacs
+
 * language specific
-** TODO PHP
+** PHP
+*** Eglot config
+#+begin_src emacs-lisp
+
+(with-eval-after-load "eglot"
+  (add-to-list 'eglot-server-programs 
+               '(php-mode . ("phpactor" "language-server"))))
+
+(defun init-php-mode ()
+  (eglot-ensure))
+
+(with-eval-after-load 'php-mode
+  ;; If phpactor command is not installed as global, remove next ;; and write the full path
+  ;; (custom-set-variables '(lsp-phpactor-path "/path/to/phpactor"))
+  (add-hook 'php-mode-hook #'init-php-mode))
+#+end_src
 ** TODO GO
 ** TODO Clojure
 ** TODO python
