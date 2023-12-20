@@ -5,11 +5,16 @@
 
 remove unnessecary ui elements
 #+begin_src emacs-lisp
-  (menu-bar-mode 0)
-  (when (display-graphic-p)
-    (tool-bar-mode 0)
-    (scroll-bar-mode 0))
+    (menu-bar-mode 0)
+    (when (display-graphic-p)
+      (tool-bar-mode 0)
+      (scroll-bar-mode 0))
+#+end_src
 
+The documentation advices against changing =use-short-answers= as the user should carully consider answering =yes-or-no-p= questions.
+
+#+begin_src emacs-lisp
+(setq use-short-answers t)  
 #+end_src
 
 * theme
@@ -58,5 +63,7 @@ I really like the modus themes.
 #+end_src
 
 #+begin_src emacs-lisp
-(global-set-key (kbd "M-SPC") 'set-mark-command)
+(when (my/device-boox-p)
+  (global-set-key (kbd "M-SPC") 'set-mark-command))
 #+end_src
+
