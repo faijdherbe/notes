@@ -1,6 +1,335 @@
 #+TITLE: exwm
 #+PROPERTY: header-args :tangle yes
 
+* EXWM configuration
+** initial setup
 #+begin_src emacs-lisp
-(message "exwm world")
+(if (version< "29" emacs-version)
+    (progn
+      (set-frame-parameter nil 'alpha-background 90)
+      (add-to-list 'default-frame-alist '(alpha-background . 90)))
+  (progn 
+    (set-frame-parameter (selected-frame) 'alpha '(90 . 90))
+    (add-to-list 'default-frame-alist '(alpha . (90 . 90)))
+    (set-fringe-mode 10)))
+#+end_src
+
+
+#+BEGIN_SRC emacs-lisp
+(require 'exwm)
+(require 'exwm-randr)
+
+(setq exwm-workspace-number 9)
+
+(defun jf/generate-exwm-randr-workspace-monitor-plist ()
+  (let ((monitor-list '())
+        (index 0))
+    (dolist (elt jf/workspace-monitor-map)
+      (setq index (1+ index))
+      (add-to-list 'monitor-list index t)
+      (add-to-list 'monitor-list elt t))
+    monitor-list))
+
+(defun jf/exwm-detect-displays ()
+  (mapcar #'cdr (car (nthcdr 2 (exwm-randr--get-monitors)))))
+
+(setq exwm-randr-workspace-monitor-plist '(1 "eDP-1"))
+
+(defun jf/move-workspace ()
+  (interactive)
+  (let ((current-workspace-index exwm-workspace-current-index))
+    (plist-put exwm-randr-workspace-monitor-plist
+               exwm-workspace-current-index
+               (completing-read "choose target monitor: " (car (nthcdr 2 (exwm-randr--get-monitors)))))
+    (exwm-randr-refresh)
+    (exwm-workspace-switch current-workspace-index)))
+
+(setq jf/monitors-ordered nil)
+
+(defun jf/get-monitor-ordered ()
+  (or jf/monitors-ordered
+      (mapcar #'car (car (nthcdr 2 (exwm-randr--get-monitors))))))
+
+(defun jf/move-workspace-offset (offset)
+  (let ((available-monitors (jf/get-monitor-ordered))
+        (current-workspace-index exwm-workspace-current-index))
+    (let ((current-monitor (plist-get exwm-randr-workspace-monitor-plist current-workspace-index)))
+      (plist-put exwm-randr-workspace-monitor-plist
+                 exwm-workspace-current-index
+                 (nth (% (+ offset (cl-position current-monitor available-monitors :test 'equal)) (length available-monitors)) available-monitors))
+      (exwm-randr-refresh)
+      (exwm-workspace-switch current-workspace-index)
+      )))
+
+(defun jf/move-workspace-right ()
+  (interactive)
+  (jf/move-workspace-offset 1))
+
+(defun jf/move-workspace-left ()
+  (interactive)
+  (jf/move-workspace-offset -1))
+
+(global-set-key (kbd "s-}") 'jf/move-workspace-right)
+(global-set-key (kbd "s-{") 'jf/move-workspace-left)
+
+
+(defun jf/monitor-setup ()
+  (interactive)
+  (shell-command (format "autorandr --load %s 2>/dev/null" 
+                         (completing-read "choose setup: " (split-string (shell-command-to-string "autorandr --detected") "\n")))))
+
+(defun jf/monitor-scale ()
+  (interactive)
+  (let ((available-monitors (mapcar #'car (car (nthcdr 2 (exwm-randr--get-monitors))))))
+        (shell-command (format "xrandr --output %s --scale %s" (completing-read "monitor: " available-monitors) (read-string "scale: ")))))
+
+
+(defun jf/exwm-workspace-sanitize (number)
+  (% (+ number (+ 1 exwm-workspace-number)) (+ 1 exwm-workspace-number)))
+
+(defun jf/exwm-workspace-next ()
+  (interactive)
+  (exwm-workspace-switch-create (jf/exwm-workspace-sanitize (+ exwm-workspace-current-index 1))))
+
+(defun jf/exwm-workspace-prev ()
+  (interactive)
+  (exwm-workspace-switch-create (jf/exwm-workspace-sanitize (- exwm-workspace-current-index 1))))
+
+
+
+(global-set-key (kbd "s-<prior>") 'jf/exwm-workspace-prev)
+(global-set-key (kbd "s-<next>") 'jf/exwm-workspace-next)
+
+(defun jf/fix-resolution ()
+  (interactive)
+  (shell-command "jf-fix-resolutions"))
+
+(bind-key "s-p" #'jf/fix-resolution)
+
+(defun jf/fix-touchscreen ()
+  (interactive)
+  (shell-command "xinput map-to-output 14 eDP-1"))
+
+;;(add-hook 'exwm-randr-screen-change-hook
+;;         (lambda ()
+;;            (start-process-shell-commandx
+;;             "autorandr" nil "autorandr -c")))
+
+
+(exwm-randr-enable)
+
+;(require 'exwm-systemtray)
+;(exwm-systemtray-enable)
+;(setq exwm-systemtray-height 24)
+
+(require 'exwm-config)
+(exwm-config-ido)
+
+;; make sure buffernames match app titles
+(add-hook 'exwm-update-class-hook
+            (lambda ()
+              (exwm-workspace-rename-buffer exwm-class-name)))
+
+(defun efs/run-in-background (command)
+  (let ((command-parts (split-string command "[ ]+")))
+    (apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
+
+(defun efs/exwm-update-title ()
+  (pcase exwm-class-name
+    ("Google-chrome" (exwm-workspace-rename-buffer (format "%s" exwm-title)))
+    ("firefox" (exwm-workspace-rename-buffer (format "%s" exwm-title)))))
+
+
+;; Automatically send the mouse cursor to the selected workspace's display
+(setq exwm-workspace-warp-cursor nil)
+
+;; Window focus should follow the mouse pointer
+(setq mouse-autoselect-window t
+      focus-follows-mouse t)
+
+;; These keys should always pass through to Emacs
+(setq exwm-input-prefix-keys
+      '(?\C-x
+        ?\C-u
+        ?\C-h
+        ?\M-x
+        ?\M-`
+        ?\M-&
+        ?\M-:
+        ?\C-\M-j  ;; Buffer list
+        ?\C-\     ;; Ctrl+Space
+        ?\s-{     ;; super+{  ;; move workspace left
+        ?\s-}     ;; super+}  ;; move workspace right
+        ?\s-\     ;; super+space
+        ?\s-!     ;; super-shift-<deskop>
+        ?\s-@
+        ?\s-#
+        ?\s-$
+        ?\s-%
+        ?\s-V
+        ?\s-P
+        ))
+
+
+
+;; Ctrl+Q will enable the next key to be sent directly
+(define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
+
+;; Set up global key bindings.  These always work, no matter the input state!
+;; Keep in mind that changing this list after EXWM initializes has no effect.
+(setq exwm-input-global-keys
+      `(
+        ;; Reset to line-mode (C-c C-k switches to char-mode via exwm-input-release-keyboard)
+        ([?\s-r] . exwm-reset)
+        
+        ;; Move between windows
+        ([s-left] . windmove-left)
+        ([s-right] . windmove-right)
+        ([s-up] . windmove-up)
+        ([s-down] . windmove-down)
+        
+        ;; Launch applications via shell command
+        ([?\s-&] . (lambda (command)
+                     (interactive (list (read-shell-command "$ ")))
+                     (start-process-shell-command command nil command)))
+        
+        ;; Switch workspace
+        ([?\s-w] . exwm-workspace-switch)
+        ([?\s-`] . (lambda () (interactive) (exwm-workspace-switch-create 0)))
+
+        (,(kbd "s-<prior>") . jf/exwm-workspace-prev)
+        (,(kbd "s-<next>") . jf/exwm-workspace-next)
+        
+        ;; 's-N': Switch to certain workspace with Super (Win) plus a number key (0 - 9)
+        ,@(mapcar (lambda (i)
+                    `(,(kbd (format "s-%d" i)) .
+                      (lambda ()
+                        (interactive)
+                        (exwm-workspace-switch-create , (- i 1)))))
+                  (number-sequence 1 9))))
+
+(exwm-input-set-key (kbd "s-SPC") 'counsel-linux-app)
+
+(setq exwm-layout-show-all-buffers t)
+(setq exwm-workspace-show-all-buffers t)
+
+;; When window title updates, use it to set the buffer name
+(add-hook 'exwm-update-title-hook #'efs/exwm-update-title)
+
+;;(efs/run-in-background "/snap/bin/polybar-git -c ~/.dotfiles/.config/polybar/config panel")
+(exwm-enable)
+
+#+END_SRC
+
+#+begin_src emacs-lisp
+;; start some extra services
+;;(efs/run-in-background "gnome-panel")
+;;(efs/run-in-background "compton")
+#+end_src
+
+** Workspace Setup
+*** Office setup
+At the office I run a monitor setup where I've got one portrait
+monitor to the left (secondary), a landscape monitor right in front of
+me (primary) and my laptop blow the primary monitor.  I like to work
+mainly on the primary monitor and use the secondary purely as source
+for chrome running slack and some media controls.  The laptop is used
+for workspaces containing things like my personal chrome instance, and
+some docker logs.  I like to keep workspace 1 as the slack/reference
+workspace, and the last few workspaces for personal stuff. This leaves
+the main productivity workspaces in the middel (2-6)
+
+My shortcuts are defined 1-based, but emacs config uses 0 based instead. 
+#+begin_src emacs-lisp
+(defun jf/workspace-setup-office ()
+  (interactive)  
+  (setq jf/monitors-ordered '("eDP-1" "DP-1-1" "DP-1-2"))
+  (setq exwm-randr-workspace-monitor-plist '(0 "eDP-1"
+                                               1 "DP-1-1"
+                                               2 "DP-1-1"
+                                               3 "DP-1-1"
+                                               4 "DP-1-1"
+                                               5 "DP-1-1"
+                                               6 "DP-1-1"
+                                               7 "DP-1-2"
+                                               8 "DP-1-2"))
+  (exwm-randr-refresh))
+
+(defun jf/workspace-setup-home ()
+  (interactive)
+  (setq jf/monitors-ordered '("eDP-1" "DP-1"))
+  (setq exwm-randr-workspace-monitor-plist '(0 "eDP-1"
+                                               1 "DP-1"
+                                               2 "DP-1"
+                                               3 "DP-1"
+                                               4 "DP-1"
+                                               5 "DP-1"
+                                               6 "eDP-1"
+                                               7 "eDP-1"
+                                               8 "eDP-1"))
+  (exwm-randr-refresh))
+
+
+
+#+end_src
+
+* TODO Cypress fix
+
+- TODO :: should I fix this to something more generic, e.g. =(jf/fix-floating-windows '("Cypress" "foo" ...))=?
+
+Cypress provides strange window properties, causing it to appear as a
+floating window that can not be focused, resized or moved.  To fix
+this we force EXWM to adjust a few properties whenever a window is
+created with the ttile "Cypress".
+#+begin_src emacs-lisp
+(add-to-list 'exwm-manage-configurations
+             '((string= exwm-title "Cypress")
+               floating nil
+               managed t))
+#+end_src
+
+* Emacs fix
+As i'm in the process of rewriting my emacs config, i'd like new emacs instances to switch to char mode immediately
+
+#+begin_src emacs-lisp
+(add-to-list 'exwm-manage-configurations
+             '((string= exwm-class-name "Emacs")
+               char-mode t))
+#+end_src
+
+
+Start panel
+#+begin_src emacs-lisp
+
+(defun efs/send-polybar-hook (module-name hook-index)
+  (start-process-shell-command "polybar-msg" nil (format "polybar-msg hook %s %s" module-name hook-index)))
+
+(defun efs/send-polybar-exwm-workspace ()
+  (efs/send-polybar-hook "exwm-workspace" 1))
+
+;; Update panel indicator when workspace changes
+(add-hook 'exwm-workspace-switch-hook #'efs/send-polybar-exwm-workspace)
+
+(efs/run-in-background "polybar -c ~/Documents/git/faijdherbe.net/.dotfiles/.config/polybar/config panel")
+#+end_src
+
+And compton. we need transparency!
+#+begin_src emacs-lisp
+(when (version< "29" emacs-version)
+  (start-process-shell-command "compton" " *compton*" "compton"))
+#+end_src
+
+* Xrandr
+#+begin_src emacs-lisp
+(defun jf/work-monitor-setup (left right)
+  (let* ((left-params (if left
+                          "--left-of DP-1-2 --auto"
+                        "--off"))
+         (right-params (if right 
+                           "--right-of DP-1-2 --mode 1680x1050"
+                         "--off")))
+    (efs/run-in-background (format "xrandr --output DP-1-1 %s --output eDP-1 %s"
+                                   left-params
+                                   right-params)))
+  (jf/workspace-setup-office))
 #+end_src

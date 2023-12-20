@@ -7,8 +7,8 @@ Ah, there it is... We can go look for Dijkstra and/A* for this one... I think th
 
 * Input
 ** Example
-#+name: example
-#+begin_example
+   #+name: example
+   #+begin_example
 2413432311323
 3215453535623
 3255245654254
@@ -22,11 +22,11 @@ Ah, there it is... We can go look for Dijkstra and/A* for this one... I think th
 1224686865563
 2546548887735
 4322674655533
-#+end_example
+   #+end_example
 
 ** Input                                                           :noexport:
-#+name: input
-#+begin_example
+   #+name: input
+   #+begin_example
 131521531314413165554663355645644257613274614177575564515343675763343717733131466417431176612316451651616515743463261461663563523613444154252
 254321311411454534466161643621353541657535174621665776157212576336534177224356633176673161736154621567774544771521656112526146345152542542144
 551351111513441213121553332663651663461337267643135466575723446757536642575253255533424362727626726757571773547675755535113411643655666421155
@@ -168,23 +168,24 @@ Ah, there it is... We can go look for Dijkstra and/A* for this one... I think th
 132233616631113614415163246465561151235211615722654454661763477364446875527263226337724654417171457672576522165442766724162511413346523112141
 415524312615655662311343327662346226346475442247556767434567325742333762626637153121541617253443571674174324232543472364252353664523655562344
 315122331212345234666316461662714174774112716446152344247762426533263122662171731364456714145662776273426434357543316152365314263542426365135
-#+end_example
+   #+end_example
 
 * Part 1
-#+begin_src elisp :var input=example
+  #+begin_src elisp :var input=example
 (defvar --aoc/blocklist nil)
 (defvar --aoc/line-length nil)
 (defvar --aoc/number-of-nodes nil)
 
-(defun --aoc23/make-node (i &optional cost route)
+
+(defun --aoc23/make-node (i cost route)
   (message "MAKE: %S %S %S" i cost route)
-  (list i ;node-id
-        cost ;index
-  	(--aoc23/filter-node-ids (list (- i --aoc/line-length)
-  				       (1- i)
-  				       (1+ i)
-  				       (+ i --aoc/line-length)));neighbours
-  	(or route (list i)))) ;shortest route
+  (list (cons 'id i) 
+        (cons 'cost cost)
+  	(cons 'neighbours (--aoc23/filter-node-ids (list (- i --aoc/line-length)
+  				                         (1- i)
+  				                         (1+ i)
+  				                         (+ i --aoc/line-length))))
+  	(cons 'route route))) 
 
 (defun --aoc23/filter-node-ids (seq)
   (seq-filter (lambda (node-id)
@@ -194,73 +195,88 @@ Ah, there it is... We can go look for Dijkstra and/A* for this one... I think th
   	      seq))
 
 (defun --aoc23/update-node (node new-cost route)
-  (let ((new-cost (or new-cost 0))
-        (ncost (aoc23/node-cost node)))
-        
-    (message "%S %S %S" ncost new-cost (< new-cost ncost))
-    (if (or (not ncost)
-            (< new-cost ncost))
-        (--aoc23/make-node (aoc23/node-id node)
-  		           new-cost
-  		           route)
-      node)))
+  (--aoc23/make-node (aoc23/node-id node)
+  		     new-cost
+  		     route))
 
 (defun aoc23/node-id (node)
-  (car node))
+  (alist-get 'id node))
 
 (defun aoc23/node-cost (node)
-  (cadr node))
+  (alist-get 'cost node))
 
 (defun aoc23/node-neighbour-ids (node)
-  (caddr node))
+  (alist-get 'neighbours node))
 
 (defun aoc23/node-get-route (node)
-  (message "NN: %S %S" node (cadddr node))
-  (cadddr node))
+  (alist-get 'route node))
 
 (defun --aoc23/node-price (node-id)
   (- (elt input node-id) ?0))
 
-(defun --aoc23/get-or-make-node (node-id &optional price)
+(defun --aoc23/get-or-make-node (node-id nodes &optional price)
   (let ((n (gethash node-id nodes nil)))
     (unless n
+      (message "node #%d not found, creating" node-id)
       (setq n (--aoc23/make-node node-id (or price (--aoc23/node-price node-id)) '()))
       (puthash node-id n nodes))
     n))
 
-(defun aoc23/part-1 (input)
+(defun aoc23/part-1 (input target-node-id)
   (setq --aoc/blocklist '())
   (setq --aoc/line-length (string-search "\n" input))
   (let ((input (string-replace "\n" "" input))
   	(nodes (make-hash-table))
   	(a '(0)))
     (setq --aoc/number-of-nodes (length input))
-    (puthash 0 (--aoc23/make-node 0 0 '()) nodes)
+    (puthash 0 (--aoc23/make-node 0 0 '(0)) nodes)
     (while a
-      (let ((node (--aoc23/get-or-make-node (car a))))
-  	(dolist (neighbour-id (aoc23/node-neighbour-ids node))
-  	  (let* ((neighbour (--aoc23/get-or-make-node neighbour-id)))
-            (puthash (aoc23/node-id node)
-  		     (--aoc23/update-node neighbour
-                                          (+ (or (aoc23/node-cost node) 0)
-                                             (--aoc23/node-price neighbour-id))
-  				          (append (list neighbour-id) (aoc23/node-get-route node)))
-  	             nodes))
-  	  )
-  	(setq --aoc/blocklist (cons (aoc23/node-id node) --aoc/blocklist))
-  	(setq a (append (--aoc23/filter-node-ids (aoc23/node-neighbour-ids node)) (cdr a)))))
+      (let ((node (gethash (car a) nodes)))
+        (dumpnode node "node: " )
+        (dolist (neighbour-id (aoc23/node-neighbour-ids node))
+          (message ">>> %d>%d >> %S" (aoc23/node-id node) neighbour-id (cons neighbour-id (aoc23/node-get-route node)))
+  	  (let* ((neighbour (--aoc23/get-or-make-node neighbour-id nodes 99999))
+                 (route (cons neighbour-id (aoc23/node-get-route node)))
+                 (cost-to-neighbour (+ (aoc23/node-cost node)
+                                       (--aoc23/node-price neighbour-id)))
+                 (unode neighbour))
+
+(message "TEST %S %S" cost-to-neighbour (aoc23/node-cost neighbour))
+            (when (< cost-to-neighbour (aoc23/node-cost neighbour))
+              (setq unode (puthash neighbour-id
+                                   (--aoc23/update-node neighbour
+                                                        cost-to-neighbour
+  				                        route)
+                                   nodes)))
+  	    (dumpnode unode "neighbour after update: ")
+            )
+  	  (setq --aoc/blocklist (cons (aoc23/node-id node) --aoc/blocklist))
+  	  (setq a (append (--aoc23/filter-node-ids (aoc23/node-neighbour-ids node)) (cdr a)))
+          
+          )))
     
-    (message ":::: %S" (gethash 8 nodes))))
+    (message ":::: %S" (gethash target-node-id nodes))))
+
+(defun dumpnode (node &optional ret)
+  (let ((msg (format "[node #%d] price: %d; cost: %d; via-route: %S"
+                     (aoc23/node-id node)
+                     (--aoc23/node-price (aoc23/node-id node))
+                     (aoc23/node-cost node)
+                     (aoc23/node-get-route node))))
+    (cond ((stringp ret)
+           (message "%s%s" ret msg))
+          ((eq ret t)
+           msg)
+          (t (message msg)))))
+
+(aoc23/part-1 input 168)
 
 
-(aoc23/part-1 "123\n456\n789")
+  #+end_src
 
-
-#+end_src
-
-#+RESULTS:
-: :::: (8 9 (5 7) (8))
+  #+RESULTS:
+  : :::: ((id . 168) (cost . 44) (neighbours) (route 168 155 156 143 130 117 104 91 78 65 52 39 26 13 0))
 
 * Part 2
-#+begin_src elisp :var input=example
-#+end_src
+  #+begin_src elisp :var input=example
+  #+end_src
