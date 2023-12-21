@@ -36,22 +36,22 @@
 
 ** treemacs
 #+begin_src emacs-lisp
-      (use-package treemacs
-        :ensure
-        :straight t
-        :config
-        (setq treemacs-width (if (display-graphic-p)
-      				   35
-      				 20)
-  	    treemacs-read-string-input 'from-minibuffer)
-        (treemacs-git-mode 'simple)  		
-        (treemacs-git-commit-diff-mode 1)
-        (treemacs-hide-gitignored-files-mode 1))
-        
-      (use-package treemacs-magit
-        :ensure
-        :after (treemacs magit)
-        :straight t)
+  (use-package treemacs
+    :ensure
+    :straight t
+    :config
+    (setq treemacs-width (if (display-graphic-p)
+  			   35
+  			 20)
+  	treemacs-read-string-input 'from-minibuffer)
+    (treemacs-git-mode 'simple)  		
+    (treemacs-git-commit-diff-mode 1)
+    (treemacs-hide-gitignored-files-mode 1))
+
+  (use-package treemacs-magit
+    :ensure
+    :after (treemacs magit)
+    :straight t)
 #+end_src
 
 * language specific
