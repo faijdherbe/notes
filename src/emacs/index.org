@@ -129,10 +129,11 @@ We'll be loading different org files for parsing so let's make it easy and less 
 Code specific to exwm, should only be included at specific situations. 
   
 #+begin_src emacs-lisp
-(when (and (not (my/device-phone-p))
-           (display-graphic-p)
-           (not (my/window-manager-p)))
-  (my/emacs-org-load-file "exwm.org"))
+  (when (and (not (my/device-phone-p))
+             (display-graphic-p)
+             (not (my/window-manager-p)))
+    (message "exwm eligable to boot")
+    (my/emacs-org-load-file "exwm.org"))
 #+end_src
 
 * interface

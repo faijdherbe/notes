@@ -1,6 +1,12 @@
 #+TITLE: generic development
 
 * generic
+** vterm
+#+begin_src emacs-lisp
+  (use-package vterm
+    :ensure
+    :straight t)
+#+end_src
 ** Magit
 #+begin_src emacs-lisp
 (use-package magit
