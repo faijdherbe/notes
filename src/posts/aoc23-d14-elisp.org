@@ -2,6 +2,7 @@
 #+date: <2023-12-14 Thu>
 
 #+begin_preview
+Oh boy.  I already anticipated part two would involve more than a single cardinal direction, and more than a single move as well.  But this amount of repeats is insane.  I think we're supposed to do some pattern recognition and deduce the answer by calculating the result from this pattern instead.  I'll look at it later. 
 #+end_preview
 
 * Input
@@ -125,7 +126,7 @@ O.O.OO..O.#.O.O.#.##.##.O..O.O...###..O..##..O#O#....O....O..O#O.........##..O#.
 #+end_example
 
 * Part 1
-#+begin_src elisp :var input=input
+#+begin_src emacs-lisp :var input=input
   (defun aoc23/move-rocks (row)
     (let ((weight 0)
   	(counter 0))
@@ -166,76 +167,5 @@ O.O.OO..O.#.O.O.#.##.##.O..O.O...###..O..##..O#O#....O....O..O#O.........##..O#.
 
 * Part 2
 #+begin_src elisp :var input=example
-  (defun aoc23/cycle-step (input)
-    (mapcar 'aoc23/move-rocks (aoc23/rotate-map input)))
-
-  (defun aoc23/move-rocks (input)
-    (let ((weight 0)
-    	(counter 0)
-  	(spaces 0)
-  	(out '()))
-      (seq-do-indexed (lambda (c i)
-    		      (cond ((= c ?O)
-  			     (setq counter (1+ counter)))
-  			    ((= c ?.)
-  			     (setq spaces (1+ spaces)))
-  		  	    ((= c ?#)
-  			     (setq out (append out
-  					       (make-list spaces ?.)
-  					       (make-list counter ?O)
-  					       '(?#)))
-  			     (setq spaces 0)
-    			     (setq counter 0))))
-    		    input)
-      (setq out (append out
-  		      (make-list spaces ?.)
-  		      (make-list counter ?O)))
-      (concat out)))
-
-
-
-  (defun aoc23/calc-weight (row)
-    (let ((weight 0)
-          (counter 0))
-      (seq-do-indexed (lambda (c i)
-                        (cond ((= c ?O)
-    			     (setq counter (1+ counter)))
-    			    ((= c ?#)
-    			     (dotimes (j counter)
-                                 (setq weight (+ weight (- i j))))
-
-  			     (setq counter 0))))
-    		    row)
-      (dotimes (j counter)
-        (setq weight (+ weight (- (length row) j))))
-
-      weight))
-
-
-
-  (let* ((cycles 1000000000)
-        (j 0)
-        (input (split-string input "\n" t))
-        (prerot 1)
-        (cresult nil)
-        (last-weight nil)
-        (break nil))
-    (dotimes (_ prerot)
-      (setq input (aoc23/rotate-map input)))
-    (while (and (< j cycles)
-  	      (not break))
-      (dotimes (i 4)
-        (setq input (aoc23/cycle-step input)))
-      (let ((w (apply '+ (mapcar 'aoc23/calc-weight input))))
-        (if (and (> (length last-weight) 10)
-  	       (apply '= (take 10 last-weight)))
-  	  (setq break t)
-  	(setq last-weight (cons w last-weight)))
-  	(message "%d > %d" w (- cycles j)))
-
-      (setq j (1+ j)))
-    (list j last-weight))
 #+end_src
 
-#+RESULTS:
-| 2 | 121 |

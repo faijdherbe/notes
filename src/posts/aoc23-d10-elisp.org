@@ -2,6 +2,7 @@
 #+date: <2023-12-10 zo>
 
 #+begin_preview
+The first part was pretty straightforward, following a path till we reach our starting position.  I skipped the second part for the time being. 
 #+end_preview
 
 * Input

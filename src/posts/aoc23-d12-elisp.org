@@ -2,6 +2,7 @@
 #+date: <2023-12-12 Tue>
 
 #+begin_preview
+Part 1 takes way too long to generate an answer, so I'll really have to rewrite my solution for part 2...  I did learn the =rx= macro with this one though, which is pretty nice.  I'll skip part 2 for now, maybe come back to it later.  
 #+end_preview
 
 * Input
@@ -1111,103 +1112,8 @@
 #+end_src
 
 #+RESULTS:
-: 7541
+: 21
 
 * Part 2
 #+begin_src elisp :var input=example
-(defun aoc23/convert-input (line)
-  (let* ((segs (string-split line " " t))
-	 (segs (mapcar (lambda (s)
-			 (apply 'concat (make-list 5 s)))
-		       segs))
-
-	 (springs (car segs))
-	 (checks (cadr segs)))
-    (list (cons 'low (aoc23/springs-to-number springs 'low))
-	  (cons 'high (aoc23/springs-to-number springs 'high))
-	  (cons 'candidates (aoc23/springs-to-candidates springs))
-	  (cons 'pattern (aoc23/checks-to-pattern checks)))))
-
-(defun aoc23/springs-to-candidates (input)
-  (let* ((input (split-string input " " t))
-	 (mask (aoc23/springs-to-number (car input) 'low))
-	 (groups (mapcar 'string-to-number (split-string (cadr input) "," t)))
-         (ret (aoc23/--build-pattern groups (1- (length (car input))) 0)))
-    (seq-filter (lambda (i)
-                  (message "%S vs %S" (int-to-binary-string i) (int-to-binary-string mask))
-                  (= i (logand i mask)))
-                ret)))
-
-(defun aoc23/group-to-int (n)
-  (let ((out 0))
-    (dotimes (i n)
-      (setq out (+ (lsh out 1) 1)))
-    out))
-
-(defun dd (int)
-  (message "%S" (int-to-binary-string int)))
-
-(defun aoc23/--build-pattern (groups max-length base)
-  (let* ((out '())
-         (n (car groups))
-         (space (- max-length (+ (apply '+ (cdr groups)) (length groups))))
-         (v 0))
-    (setq groups (cdr groups))
-    (message "process group %S in space %S" n space)
-    
-    (dotimes (i space)
-      (let ((space-left (+ i space)))
-        (setq v (logior base (lsh (aoc23/group-to-int n) (+ i space-left))))
-
-        (unless groups
-          (setq out (cons v out)))
-        
-        (when groups
-          (dolist (variation (aoc23/--build-pattern groups space-left v))
-            (setq out (cons (logior v variation) out))
-            ))))
-        
-    out))
-
-(apply '+ (aoc23/springs-to-candidates "?###???????? 3,2,1"))
-;                            "xxxxxxx.^^.^
-(defun aoc23/springs-to-number (in low)
-  (let* ((in (string-replace "?" (if (eq low 'low) "#" ".") in))
-	 (in (string-replace "." "0" in))
-	 (in (string-replace "#" "1" in)))
-    (string-to-number in 2)))
-
-(defun int-to-binary-string (i)
-  "convert an integer into it's binary representation in string format"
-  (let ((res ""))
-    (while (not (= i 0))
-      (setq res (concat (if (= 1 (logand i 1)) "1" "0") res))
-      (setq i (lsh i -1)))
-    (if (string= res "")
-	(setq res "0"))
-    res))
-
-(defun aoc23/spring-config-p (number check)
-  (let ((s (int-to-binary-string number))
-	(p (alist-get 'pattern check)))
-    (string-match-p p s)))
-
-(defun aoc23/part-2 (input)
-  (let ((in (string-split input "\n" t))
-	(sum 0))
-    (dolist (line in)
-      (let* ((m (aoc23/convert-input line))
-	     (i (alist-get 'low m))
-	     (last (alist-get 'high m))
-	     (c (alist-get 'candidates m)))
-	(dolist (s c)
-	  (when (aoc23/spring-config-p s m)
-	    (setq sum (1+ sum)))
-	  (setq i (1+ i)))))
-    sum))
-
-
-(aoc23/part-2 input)
-
-
 #+end_src

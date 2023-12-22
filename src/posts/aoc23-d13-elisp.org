@@ -2,6 +2,7 @@
 #+date: <2023-12-13 Wed>
 
 #+begin_preview
+Part one and two are practically equals, except for a custom predicate for comparing lists.  The lists in part two are considered equal if there is /exactly one/ character that in the entire list that does not match its counterpart. 
 #+end_preview
 
 * Input

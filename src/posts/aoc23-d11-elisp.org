@@ -2,6 +2,7 @@
 #+date: <2023-12-11 ma>
 
 #+begin_preview
+An easier one again.  For the second part it was very tempting to just insert all those extra columns,  but calculating the offset based on the number of previously seen empty columns/rows is more efficient.
 #+end_preview
 
 * Input
