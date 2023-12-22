@@ -1,0 +1,6 @@
+#+TITLE: Advent of Code
+#+DATE: <2023-12-22 vr>
+
+#+begin_preview
+This year I challenged myself to participate in the Advent of Code again, using Elisp as my weapon of choice.  Several posts had already been added to this page, but to keep it a bit cleaner, I've moved them to a dedicated section instead.  They can now be found in the /advent-of-code/ section listed at the top of this site.
+#+end_preview

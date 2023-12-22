@@ -2,6 +2,7 @@
 #+date: <2023-12-15 Fri>
 
 #+begin_preview
+Part one was pretty simple, and only had a very little influence over part two.  I feel like my list skills are improving. 
 #+end_preview
 
 * Input
@@ -33,20 +34,70 @@ tsqxjb=8,hr=6,dtv=1,chhq=8,lcrbv=6,szm-,mx-,xj=4,dmm-,prdgn-,cnk-,tl=5,zhc-,xvcp
 : 498548
 
 * Part 2
-#+begin_src elisp :var input=example
+#+begin_src elisp :var input=input
+(defun aoc23/seq-to-cons (seq)
+  (let ((label "")
+        (lens 0))
+    (seq-do (lambda (v)
+  	      (cond ((= v ?-)
+                     (setq lens ?-))
 
-  					;(seq-reduce (lambda (v m) (% (* 17 (+ v m)) 256)) s 0))
+                    ((= v ?=)
+                     (setq lens ?=))
 
-  (mapcar (lambda (seq)
-  	  (seq-reduce (lambda (v c)
-  			(cond ((not c)
-  			       (cons (list v) nil))
-  			      ((= v ?-)
-  			       (cons (car c) ?-))
-  			      ((and (= ?= (cdr c)) (>= v ?0) (<= v ?9))
-  			       (cons (car c) (- v ?0)))
-  			      ((= ?= v)
-  			       (cons (car c) ?=))))
-  		      seq nil))
-  	(string-split input "," t))
+                    ((= lens ?=)
+                     (setq lens (- v ?0)))
+
+                    (t (setq label (concat label (list v))))))
+            seq)
+    (cons label lens)))
+
+(defun aoc23/hash (label)
+  (seq-reduce (lambda (v m) (% (* 17 (+ v m)) 256)) label 0))
+
+(defun aoc23/process-lens (lenses lens)
+  (cond ((eq (cdr lens) ?-)
+         (aoc23/--remove-lens lenses lens))
+        (t
+         (aoc23/--replace-lens lenses lens))))
+
+(defun aoc23/--replace-lens (lenses lens)
+  (if (assoc (car lens) lenses)
+      (mapcar (lambda (l)
+                       (if (string= (car l) (car lens))
+                           lens
+                         l)) lenses)
+    (append lenses (list lens))))
+
+
+(defun aoc23/--remove-lens (lenses lens)
+  (seq-filter (lambda (l) (not (string= (car l) (car lens)))) lenses))
+
+(defun aoc23/part-2 (input)
+  (let ((map (make-hash-table))
+        (ret 0))
+    (seq-do (lambda (c)
+              (let* ((label (car c))
+                     (lens (cdr c))
+                     (box (aoc23/hash (car c)))
+                     (lenses (gethash box map)))
+                (puthash box (aoc23/process-lens lenses c) map))
+
+              )
+            (mapcar 'aoc23/seq-to-cons
+  	            (string-split input "," t)))
+    (maphash (lambda (box value)
+               (seq-do-indexed (lambda (lens i)
+                                 (setq ret (+ ret
+                                              (* (1+ box)
+                                                 (1+ i)
+                                                 (cdr lens)))))
+                               value))
+             map)
+    ret))
+
+(aoc23/part-2 input)
 #+end_src
+
+#+RESULTS:
+: 286278

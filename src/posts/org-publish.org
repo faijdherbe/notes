@@ -142,6 +142,26 @@ And finally, I'll need to be able to read in some files to inject them as header
          :sitemap-sort-files anti-chronologically
          :sitemap-format-entry my/org-sitemap-date-entry-format)
 
+       ("advent-of-code"
+         :base-directory "./src/advent-of-code/"
+         :base-extension "org"
+         :publishing-directory "./build/public_html/advent-of-code/"
+         :recursive t
+         :publishing-function org-html-publish-to-html
+         :headline-levels 4
+         :auto-sitemap t
+         :html-preamble ,pub/preamble
+         :html-postamble ,pub/postamble
+         :sitemap-title "Advent of Code"
+         :html-html5-fancy t
+         :sitemap-filename "index.html"
+         :with-tags nil
+         :with-toc t
+         :html-link-org-files-as-html t
+         :section-numbers nil
+         :sitemap-sort-files anti-chronologically
+         :sitemap-format-entry my/org-sitemap-date-entry-format)
+
         ("emacs"
          :base-directory "./src/emacs/"
          :base-extension "org"
@@ -175,6 +195,7 @@ And finally, I'll need to be able to read in some files to inject them as header
         
         ("org" :components ("posts"
                             "emacs"
+                            "advent-of-code"
                             "statics"
                             "tangled-statics"))
         ;; ... add all the components here (see below)...
@@ -210,6 +231,7 @@ These pre- and postambles are both written in HTML, as I did not succeed in expo
     <span><a href="/">faijdherbe.net</span></a>
     <ul>
         <li><a href="/">posts</a></li>
+        <li><a href="/advent-of-code/">advent of code</a></li>
         <li><a href="/emacs/">emacs</a></li>
     </ul>
 </nav>

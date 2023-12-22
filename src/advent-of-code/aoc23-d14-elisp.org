@@ -20,6 +20,7 @@ O.#..O.#.#
 #....###..
 #OO..#....
 #+end_example
+
 ** Input                                                           :noexport:
 #+name: input
 #+begin_example
@@ -144,7 +145,7 @@ O.O.OO..O.#.O.O.#.##.##.O..O.O...###..O..##..O#O#....O....O..O#O.........##..O#.
 
       weight))
 
-  )
+  
   (defun aoc23/rotate-map (lines)
     (let ((length lines)
   	(buf '())
@@ -163,7 +164,7 @@ O.O.OO..O.#.O.O.#.##.##.O..O.O...###..O..##..O#O#....O....O..O#O.........##..O#.
 #+end_src
 
 #+RESULTS:
-: 0
+: 106997
 
 * Part 2
 #+begin_src elisp :var input=example

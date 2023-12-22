@@ -2,6 +2,7 @@
 #+date: <2023-12-16 Sat>
 
 #+begin_preview
+Part one involves once again, following a path without getting stuck in an endless loop.  For part two my solution was to simple run the same code over and over again and deduce the answer, but it got rejected.  I have a gut feeling this is due to to loop detection, which kicks in at the wrong moment and thus stopping a trace prematurely.  Will look into this later.
 #+end_preview
 
 * Input
@@ -221,109 +222,7 @@
 
 * Part 2
 #+begin_src elisp :var input=input
-              (defun aoc23/part-1 (input start)
-                (let ((stack (list start))
-              	history
-              	h2
-              	(length (1+ (string-search "\n" input))))
-                  (while stack
-                    ;(message "> %S" stack)
-                    (let* ((cell (car stack))
-              	     (next (aoc23/process-cell cell input length))
-              	     (next (seq-filter (lambda (c)
-              				 (and (aoc23/valid-cell-p c input length)
-              				      (not (member cell h2))))
-              			       next)))
-              	(setq history (cons (car cell) history))
-              	(setq h2 (cons cell h2))
-              	(if next
-              	    (setq stack (append (cdr stack) next))
-              	  (setq stack (cdr stack)))
-              	))
-                  (seq-uniq (mapcar 'car h2))))
 
-              (defun aoc23/valid-cell-p (cell input length)
-                (let ((j (car cell)))
-                  (and (>= j 0)
-              	 (< j (length input))
-              	 (not (= (elt input j) ?\n)))))
-
-              (defun aoc23/translate (i length vector)
-                (+ i (car vector)
-                   (* length (cdr vector))))
-
-              (defun aoc23/make-cell (i length vector)
-                (cons (aoc23/translate i length vector) vector))
-
-              (defun aoc23/process-cell (cell input length)
-                (let* ((i (car cell))
-              	 (vector (cdr cell))
-              	 (c (elt input i)))
-                  (cond ((= c ?.)
-              	   (list (aoc23/make-cell i length vector)))
-              	  
-              	  ((= 1 (abs (car vector)))
-              	   (cond ((= c ?-)
-              		  (list (aoc23/make-cell i length vector)))
-              		 ((= c ?\\)
-              		  (list (aoc23/make-cell i length (cons 0 (car vector)))))
-              		 ((= c ?/)
-              		  (list (aoc23/make-cell i length (cons 0 (* -1 (car vector))))))
-              		 ((= c ?|)
-              		  (list (aoc23/make-cell i length '(0 . -1))
-              			(aoc23/make-cell i length '(0 . 1))))))
-              	  
-              	  ((= 1 (abs (cdr vector)))
-              	   (cond ((= c ?|)
-              		  (list (aoc23/make-cell i length vector)))
-              		 ((= c ?/) 
-              		  (list (aoc23/make-cell i length (cons (* -1 (cdr vector)) 0))))
-              		 ((= c ?\\) 
-              		  (list (aoc23/make-cell i length (cons (cdr vector) 0))))
-              		 ((= c ?-)
-              		  (list (aoc23/make-cell i length '(-1 . 0))
-              			(aoc23/make-cell i length '(1 . 0)))))))))
-
-        (defun to-pos (x y w)
-          (+ (% x (1- w))
-             (/ y (1- w))))
-
-
-        (defun part-2 (start)
-          (save-excursion 
-              (let* ((m (aoc23/part-1 input start))
-                     (answer (length m)))
-                (switch-to-buffer-other-frame "*map*")
-                (with-current-buffer "*map*"
-                  (dotimes (i (length input))
-                    (let ((c (char-to-string (elt input i))))
-              	(when (string= c "\n")
-              	  (setq c (concat "$" c)))
-              	  (when (member i m)
-              	   (setq c (propertize c 'font-lock-face '(:foreground "red"))))
-                    (insert c)))
-  		)
-                (insert (format "\n\nanswer: %d\n\n\n" answer))
-    	  answer)))
-
-        (let* ((lines (split-string input "\n"))
-               (w (length (car lines)))
-               (h (length lines))
-               (m 0))
-      (with-current-buffer "*map*"
-        (erase-buffer))
-
-          (dotimes (y h)
-            (setq m (max m
-        		   (part-2 (cons (to-pos 0 y w) '(1 . 0)))
-        		   (part-2 (cons (to-pos (1- w) y w) '(-1 . 0))))))
-          (dotimes (x w)
-            (setq m (max m
-        		 (part-2 (cons (to-pos x 0 w) '(0 . 1)))
-        		 (part-2 (cons (to-pos x (1- h) w) '(0 . -1))))))
-          (message "max: %d" m))
-        	    
-              
 #+end_src
 
 #+RESULTS:
