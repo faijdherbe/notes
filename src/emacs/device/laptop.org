@@ -1,0 +1,91 @@
+#+TITLE: Laptop
+
+* screen brightness
+#+begin_src emacs-lisp
+; dbus-send
+; --session --type=method_call
+; --dest="org.gnome.SettingsDaemon.Power" /org/gnome/SettingsDaemon/Power
+; org.freedesktop.DBus.Properties.Set string:"org.gnome.SettingsDaemon.Power.Screen"
+; string:"Brightness"
+; variant:int32:100
+
+(defun laptop-brightness (brightness)
+  (interactive "P")
+  (let ((brightness (or brightness (read-string "Brightness: "))))
+    (setq laptop-brightness--last-known-value brightness)
+    (shell-command (format (string-join
+                    '("dbus-send"
+                      "--session"
+                      "--type=method_call"
+                      "--dest=\"org.gnome.SettingsDaemon.Power\""
+                      "/org/gnome/SettingsDaemon/Power"
+                      "org.freedesktop.DBus.Properties.Set"
+                      "string:\"org.gnome.SettingsDaemon.Power.Screen\""
+                      "string:\"Brightness\""
+                      "variant:int32:%s")
+                    " ") brightness))))
+#+end_src
+
+* power menu
+#+begin_src emacs-lisp
+(defhydra jf/power-menu ()
+  "Power"
+  ("p" jf/system-command--poweroff "power off")
+  ;("r" jf/system-command--reboot "reboot")
+  ;("s" jf/system-command--suspend "suspend")
+)
+
+(defun jf/system-command--poweroff ()
+  (interactive)
+  (if (yes-or-no-p "power off system?")
+      (progn
+        (save-some-buffers)
+        (shell-command "systemctl poweroff"))))
+
+(defun jf/system-command--suspend ()
+  (if (yes-or-no-p "suspend system?")
+      (progn
+        (save-some-buffers)
+        (shell-command "systemctl suspends"))))
+
+(defun jf/system-command--reboot ()
+  (if (yes-or-no-p "reboot system?")
+      (progn
+        (save-some-buffers)
+        (shell-command "systemctl reboot"))))
+
+(global-set-key (kbd "s-P") 'jf/power-menu/body)
+#+end_src
+
+
+* Privacy Mode
+#+begin_src emacs-lisp
+(setq my/focus-mode-p nil)
+(setq my/focus-mode-dim-value 0)
+(setq my/focus-mode-brighten-value 100)
+
+(defun my/update-laptop-focus-mode-state ()
+  (if my/focus-mode-p
+    (let* ((current-workspace-index exwm-workspace-current-index)
+           (current-monitor (plist-get exwm-randr-workspace-monitor-plist current-workspace-index))
+           (current-monitor (if current-monitor current-monitor "eDP-1"))
+           (multi-monitor-p (< 1 (length (car (nthcdr 2 (exwm-randr--get-monitors)))))))
+      (if (and multi-monitor-p (not (string= current-monitor "eDP-1")))
+          (my/laptop-focus-mode-dim)
+        (my/laptop-focus-mode-brighten)))
+    (my/laptop-focus-mode-brighten)))
+
+(defun my/laptop-focus-mode-brighten ()
+  (laptop-brightness my/focus-mode-brighten-value))
+
+(defun my/laptop-focus-mode-dim ()
+  (laptop-brightness my/focus-mode-dim-value))
+
+(defun my/laptop-focus-mode-toggle ()
+  (interactive)
+  (setq my/focus-mode-p (not my/focus-mode-p))
+  (my/update-laptop-focus-mode-state))
+
+(add-hook 'exwm-workspace-switch-hook #'my/update-laptop-focus-mode-state)
+
+#+end_src

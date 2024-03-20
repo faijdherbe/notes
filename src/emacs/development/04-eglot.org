@@ -1,0 +1,19 @@
+#+TITLE: eglot
+
+* TODO eglot
+#+begin_src emacs-lisp
+(use-package eglot
+  :ensure
+  :straight t
+  :bind (:map eglot-mode-map ("C-c e = =" . eglot-format-buffer)
+              ("C-c e r r" . eglot-rename)
+              ("C-c e g i" . eglot-find-implementation)
+              ("C-c e g d" . eglot-find-declaration)
+              ("C-c e g g" . eglot-find-typeDefinition)
+              ("C-c e a o" . eglot-code-action-organize-imports)
+              ("C-c e a a" . eglot-code-actions))
+  )
+                                        ;(with-eval-after-load "eglot"
+                                        ;  (add-to-list 'eglot-server-programs '(php-mode "phpstan")))
+
+#+end_src

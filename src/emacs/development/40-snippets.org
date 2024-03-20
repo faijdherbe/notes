@@ -1,0 +1,10 @@
+#+TITLE: snippets
+
+* Yasnippet
+#+begin_src emacs-lisp
+(use-package yasnippet
+  :ensure t
+  :config
+  (yas-reload-all)
+  (add-hook 'prog-mode-hook #'yas-minor-mode))
+#+end_src

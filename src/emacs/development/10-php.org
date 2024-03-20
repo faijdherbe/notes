@@ -1,0 +1,24 @@
+#+TITLE: PHP
+
+* PHP mode
+#+begin_src emacs-lisp
+  (use-package php-mode
+    :ensure
+    :straight t)
+#+end_src
+
+* Eglot config
+#+begin_src emacs-lisp
+
+(with-eval-after-load "eglot"
+  (add-to-list 'eglot-server-programs 
+               '(php-mode . ("phpactor" "language-server"))))
+
+(defun init-php-mode ()
+  (eglot-ensure))
+
+(with-eval-after-load 'php-mode
+  ;; If phpactor command is not installed as global, remove next ;; and write the full path
+  ;; (custom-set-variables '(lsp-phpactor-path "/path/to/phpactor"))
+  (add-hook 'php-mode-hook #'init-php-mode))
+#+end_src

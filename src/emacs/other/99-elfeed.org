@@ -1,0 +1,23 @@
+#+TITLE: Elfeed
+
+#+begin_src emacs-lisp
+(use-package elfeed
+  :straight t
+  :config
+  (setq elfeed-feeds '(
+                       ("https://www.gmtgames.com/NewsRSS.aspx" prive games)
+                       ("https://insidegmt.com/feed/" prive games)
+                       ("https://sachachua.com/blog/feed" emacs prive)
+                       ("https://shopify.dev/changelog/feed.xml" shopify tid dev)
+                       ("https://developers.bol.com/api/v1/en/newsFeed" bol tid dev)
+                       ("https://github.com/laravel/laravel/releases.atom" laravel php releases)
+                       ("https://github.com/laravel/framework/releases.atom" laravel php releases)
+                       ("https://www.php.net/releases/feed.php" php releases)
+                       ("https://www.php.net/feed.atom" php)
+                       ("https://blog.jetbrains.com/phpstorm/feed/" php)
+                       ("https://planet.emacslife.com/atom.xml" emacs prive)
+                       ("https://us15.campaign-archive.com/feed?u=dbfcd660859177225962fa83e&id=a94ca11274" php dev tid)
+                       ))
+  :bind
+  ("C-x w" . elfeed))
+  #+end_src 

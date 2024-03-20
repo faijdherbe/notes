@@ -1,0 +1,11 @@
+#+TITLE: web-mode
+
+* generic
+#+begin_src emacs-lisp
+(defun remove-electric-indent-mode ()
+  (electric-indent-local-mode -1))
+
+(setq web-mode-enable-auto-indentation nil)
+
+(add-hook 'web-mode-hook #'remove-electric-indent-mode)
+#+end_src

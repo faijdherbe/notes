@@ -1,0 +1,72 @@
+#+TITLE: Literate GTD config
+#+AUTHOR: Jeroen Faijdherbe <jeroen@faijdherbe.net>
+
+
+* Org Calendar
+** Main accessor
+
+#+begin_src emacs-lisp
+(define-key global-map (kbd "C-c a") 'org-agenda)
+#+end_src
+
+** persist recent tasks.
+
+#+begin_src emacs-lisp
+(setq org-clock-persist 'history)
+(org-clock-persistence-insinuate)
+#+end_src
+
+** UI related stuff
+
+remove tags from displaying in agenda
+#+begin_src emacs-lisp
+(setq org-agenda-hide-tags-regexp nil)
+#+end_src
+
+And also hide some other stuff for todo items on the left
+#+begin_src emacs-lisp
+(setq org-agenda-prefix-format
+      '((agenda . " %i %-20:c%?-12t% s")
+        (todo   . " ")
+        (tags   . " %i %-12:c")
+        (search . " %i %-12:c")))
+#+end_src
+
+** Todos
+#+begin_src emacs-lisp
+(setq org-capture-templates
+      `(("i" "Inbox" entry  (file "inbox.org")
+         ,(concat "* TODO %?\n"
+                  "/Entered on/ %U"))
+        ("n" "Note" entry  (file "notes.org")
+         ,(concat "* Note (%a)\n"
+                  "/Entered on/ %U\n" "\n" "%?"))))
+#+end_src
+
+** The Actual Agenda
+*** Updating the file lists on open agenda
+#+begin_src emacs-lisp
+(require 'f)
+
+(setq org-directory "~/gtd")
+
+(setq org-treat-insert-todo-heading-as-state-change t)
+
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "NEXT(n)" "INPROGRESS(p!)" "REVIEW(r!)" "|" "DONE(d@)" "HOLD(h!)" "CANCELLED(c@)")))
+#+end_src
+
+#+begin_src emacs-lisp
+(defun jf/org-agenda-files ()
+  (append '("inbox.org" "notes.org" "contacts.org")
+          (org-roam-list-files)))
+
+(defun jf/org-agenda-files-update (&rest _)
+  "Update the value of `org-agenda-files'."
+  (setq org-agenda-files (jf/org-agenda-files)))
+
+(advice-add 'org-agenda :before #'jf/org-agenda-files-update)
+#+end_src
+
+
+

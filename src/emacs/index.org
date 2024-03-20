@@ -10,6 +10,7 @@ Currently there is an issue with org-mode verions...
 #+end_quote
 
 
+
 * installation
 #+begin_src emacs-lisp :tangle no :results silent
   (org-babel-tangle)
@@ -27,7 +28,7 @@ Currently there is an issue with org-mode verions...
 
 * init
 #+begin_src emacs-lisp :tangle init.el
- (when (version< "27" emacs-version)
+(when (version< "27" emacs-version)
   (message "version OK")
   (setq package-enable-at-startup nil))
 
@@ -43,13 +44,31 @@ Currently there is an issue with org-mode verions...
       (goto-char (point-max))
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
+
+
+;; disable built-in org-mode
+(assq-delete-all 'org package--builtins)
+(assq-delete-all 'org package--builtin-versions)
+
+;; fetch org-mode
 (straight-use-package 'org)
 (straight-use-package 'use-package)
+
+(setq locale-coding-system 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+(set-selection-coding-system 'utf-8)
+(prefer-coding-system 'utf-8)
+
+;; disable background mode
+(use-package frame
+  :bind
+  ("C-z" . nil)
+  ("C-x C-z" . nil))
 #+end_src
 
 #+begin_src emacs-lisp :tangle init.el
 (require 'org)
-(message "hello")
 (org-babel-load-file "~/.config/emacs-org/src/index.org")
 #+end_src
 
@@ -107,7 +126,7 @@ We'll also want to know if there's a window manager available.
 We'll be loading different org files for parsing so let's make it easy and less error sensitive, so if one file fails, it won't take down the rest of the execution.
 
 #+begin_src emacs-lisp
-(defconst my/emacs-org-conf-basepath "~/.config/emacs-org/src/")
+(defconst my/emacs-org-conf-basepath "/home/jeroen/Documents/git/faijdherbe.net/faijdherbe-elstatic/src/emacs/")
 
 (defun my/emacs-org-load-file (filename)
   ""
@@ -136,6 +155,12 @@ Code specific to exwm, should only be included at specific situations.
     (my/emacs-org-load-file "exwm.org"))
 #+end_src
 
+* generic
+[[file:generic.org][generic.org]]
+#+begin_src emacs-lisp
+(my/emacs-org-load-file "generic.org")
+#+end_src
+
 * interface
 [[file:interface.org][interface.org]]
 
@@ -143,15 +168,43 @@ Code specific to exwm, should only be included at specific situations.
 (my/emacs-org-load-file "interface.org")
 #+end_src
 
-* org
+* org-mode
+** Generic org-mode configuration
 [[file:org.org][org.org]]
 #+begin_src emacs-lisp
 (my/emacs-org-load-file "org.org")
 #+end_src
 
-* generic development
+** org-mode calendar related
+[[file:org-mode-agenda.org][org-mode-agenda.org]]
+#+begin_src emacs-lisp
+(my/emacs-org-load-file "org-mode-agenda.org")
+#+end_src
+
+* development
+** Generic
 [[file:development.org][development.org]]
 #+begin_src emacs-lisp
 (my/emacs-org-load-file "development.org")
 #+end_src
 
+** This Is Development
+[[file:tid.org.gpg][tid.org (gpg encrypted)]]
+
+This file is likely to contian some configuration that is does not concern anyone outide the company, so i'll leave this outside git, and encrypted on disk. 
+#+begin_src emacs-lisp
+(my/emacs-org-load-file "tid.org.gpg")
+#+end_src
+
+* Other
+[[file:other.org][other.org]]
+
+#+begin_src emacs-lisp
+(my/emacs-org-load-file "other.org")
+#+end_src
+
+* Device specific
+#+begin_src emacs-lisp
+(when (my/device-laptop-p)
+  (my/emacs-org-load-file "device/laptop.org"))
+#+end_src

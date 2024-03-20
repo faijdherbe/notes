@@ -1,0 +1,83 @@
+#+TITLE: Other configuration
+
+* other extended
+#+begin_src emacs-lisp
+(seq-do 'my/emacs-org-load-file
+        '(
+          "other/99-elfeed.org"
+          ))
+#+end_src
+
+* Small QOL enhancements
+** String inflection
+#+begin_src emacs-lisp
+(defun jf/string-inflection-cycle-auto ()
+  "switching by major-mode"
+  (interactive)
+  (cond
+   ;; for java
+   ((eq major-mode 'java-mode)
+    (string-inflection-java-style-cycle))
+   ;; for python
+   ((eq major-mode 'python-mode)
+    (string-inflection-python-style-cycle))
+   ;; php
+   ((eq major-mode 'php-mode)
+    (string-inflection-all-cycle))
+
+   (t
+    ;; default
+    (string-inflection-all-cycle))))
+
+(use-package string-inflection
+  :straight t
+  :bind
+  ( "C-_" . jf/string-inflection-cycle-auto))
+
+#+end_src
+
+** Browse URLs - ask for browser
+#+begin_src emacs-lisp
+(defun browse-url-choose-browser (url &optional new-window)
+  (interactive)
+  (let* ((choice (completing-read "choose browser: " '("chrome" "firefox" "eww"))))
+    (cond ((string= "firefox" choice)
+           (browse-url-firefox url new-window))
+          ((string= "chrome" choice)
+           (browse-url-chrome url new-window))
+          ((string= "eww" choice)
+           (eww url t))
+          (t
+           (browse-url-default-browser url new-window)))))
+
+(setq browse-url-browser-function 'browse-url-choose-browser)
+#+end_src
+
+** TODO shortcuts
+Not really fond of this part, but its part of my daily post-login muscle memory by now...
+
+#+begin_src emacs-lisp
+(setq jf/bookmarks
+  '(("slack (tis)" browse-url-chrome "http://tisgroupteam.slack.com/")
+    ("phpc" browse-url-firefox "https://phpc.social")
+    ("whatsapp" browse-url-firefox "https://web.whatsapp.com")))
+
+(defun jf/bookmarks--browser (key)
+  "extract browser for key"
+  (cadr (assoc key jf/bookmarks)))
+
+(defun jf/bookmarks--url (key)
+  "extract url for key"
+  (caddr (assoc key jf/bookmarks)))
+
+
+
+(defun jf/bookmarks-go ()
+  (interactive)
+  (let* ((bookmark (completing-read "where: " (mapcar 'car jf/bookmarks)))
+         (browser (jf/bookmarks--browser bookmark))
+         (url (jf/bookmarks--url bookmark)))
+    (funcall browser url)))
+
+(global-set-key (kbd "C-c C-b g") 'jf/bookmarks-go)
+#+end_src

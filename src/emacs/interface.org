@@ -5,10 +5,19 @@
 
 remove unnessecary ui elements
 #+begin_src emacs-lisp
-    (menu-bar-mode 0)
-    (when (display-graphic-p)
-      (tool-bar-mode 0)
-      (scroll-bar-mode 0))
+;; no menus
+(menu-bar-mode 0)
+
+;; no other graphical elements if applicable
+(when (display-graphic-p)
+  (tool-bar-mode 0)
+  (scroll-bar-mode 0))
+
+;; C-arrow through words everywhere
+(global-subword-mode 1)
+
+;; shorter y/n questions
+(defalias 'yes-or-no-p 'y-or-n-p)
 #+end_src
 
 The documentation advices against changing =use-short-answers= as the user should carully consider answering =yes-or-no-p= questions.
@@ -67,3 +76,57 @@ I really like the modus themes.
   (global-set-key (kbd "M-SPC") 'set-mark-command))
 #+end_src
 
+* Expand region
+Expand region to semantical parent.
+#+BEGIN_SRC emacs-lisp
+(use-package expand-region
+  :straight t
+  :bind ("C-q" . er/expand-region))
+#+END_SRC
+
+* Ace-Jump
+Fancy jumping around in buffer using characters
+#+begin_src emacs-lisp
+(require 'cl)
+
+(use-package ace-jump-mode
+  :straight t
+  :bind
+  ("C-c SPC" . ace-jump-char-mode))
+#+end_src
+
+* Switch window
+#+begin_src emacs-lisp
+(use-package switch-window
+  :straight t
+  :config
+  (setq switch-window-input-style 'read-event)
+  (setq switch-window-increase 2)
+  (setq switch-window-threshold 2)
+  (setq switch-window-shortcut-style 'qwerty)
+  (setq switch-window-minibuffer-shortcut ?z)
+  (setq switch-window-qwerty-shortcuts
+        '("a" "s" "d" "f" "j" "k" "l" "q" "w" "e" "r" "t" "y" "u" "i" "o" "p"))
+  :bind
+  ([remap delete-other-windows] . switch-window-then-maximize)
+  ([remap other-window] . switch-window)
+  ([remap split-window-below] . switch-window-then-split-below)
+  ([remap split-and-follow-horizontally] . switch-window-then-split-below)
+  ([remap split-window-right] . switch-window-then-split-right)
+  ([remap split-and-follow-vertically] . switch-window-then-split-right)
+  ([remap delete-window] . switch-window-then-delete))
+#+end_src
+
+* Which key
+#+BEGIN_SRC emacs-lisp
+(use-package which-key
+  :straight t
+  :config (which-key-mode))
+#+END_SRC
+
+* Icons
+#+begin_src emacs-lisp
+(use-package all-the-icons
+  :straight t
+  :if (display-graphic-p))
+#+end_src

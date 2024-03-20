@@ -1,0 +1,9 @@
+#+TITLE: Generic setup
+
+* Disable bringing emacs to the background
+#+begin_src emacs-lisp
+(use-package frame
+  :bind
+  ("C-z" . nil)
+  ("C-x C-z" . nil))
+#+end_src
