@@ -47,8 +47,8 @@ Currently there is an issue with org-mode verions...
 
 
 ;; disable built-in org-mode
-(assq-delete-all 'org package--builtins)
-(assq-delete-all 'org package--builtin-versions)
+; (assq-delete-all 'org package--builtins)
+; (assq-delete-all 'org package--builtin-versions)
 
 ;; fetch org-mode
 (straight-use-package 'org)
@@ -68,8 +68,8 @@ Currently there is an issue with org-mode verions...
 #+end_src
 
 #+begin_src emacs-lisp :tangle init.el
-(require 'org)
-(org-babel-load-file "~/.config/emacs-org/src/index.org")
+  (require 'org)
+  (org-babel-load-file "~/.emacs.d/index.org")
 #+end_src
 
 * context  
@@ -126,7 +126,7 @@ We'll also want to know if there's a window manager available.
 We'll be loading different org files for parsing so let's make it easy and less error sensitive, so if one file fails, it won't take down the rest of the execution.
 
 #+begin_src emacs-lisp
-(defconst my/emacs-org-conf-basepath "/home/jeroen/Documents/git/faijdherbe.net/faijdherbe-elstatic/src/emacs/")
+(defconst my/emacs-org-conf-basepath "~/.emacs.d/")
 
 (defun my/emacs-org-load-file (filename)
   ""

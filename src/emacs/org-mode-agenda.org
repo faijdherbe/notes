@@ -46,7 +46,7 @@ And also hide some other stuff for todo items on the left
 ** The Actual Agenda
 *** Updating the file lists on open agenda
 #+begin_src emacs-lisp
-(require 'f)
+;(require 'f)
 
 (setq org-directory "~/gtd")
 
