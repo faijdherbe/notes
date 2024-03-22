@@ -1,22 +1,89 @@
 #+TITLE: Treemacs
 
-
 * treemacs
 #+begin_src emacs-lisp
-  (use-package treemacs
-    :ensure
-    :straight t
-    :config
-    (setq treemacs-width (if (display-graphic-p)
-  			   35
-  			 20)
-  	treemacs-read-string-input 'from-minibuffer)
-    (treemacs-git-mode 'simple)  		
-    (treemacs-git-commit-diff-mode 1)
-    (treemacs-hide-gitignored-files-mode 1))
+(use-package treemacs
+  :ensure
 
-  (use-package treemacs-magit
-    :ensure
-    :after (treemacs magit)
-    :straight t)
+  :straight t
+
+  :defer t
+
+  :init
+  (with-eval-after-load 'winum
+    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+
+  :config
+  (setq treemacs-width (if (display-graphic-p)
+  			   35 20)
+  	treemacs-read-string-input 'from-minibuffer
+        treemacs-no-png-images nil
+        treemacs-workspace-switch-cleanup nil)
+
+  (treemacs-git-mode 'simple)  		
+  (treemacs-git-commit-diff-mode 1)
+  (treemacs-hide-gitignored-files-mode 1)
+
+  ;; (custom-set-faces
+  ;;  '(treemacs-root-face ((t (:inherit font-lock-constant-face :underline t :weight bold :height 1.2))))
+  ;;  '(treemacs-directory-face ((t (:height 0.9))))
+  ;;  '(treemacs-directory-collapsed-face ((t (:height 0.9))))
+  ;;  '(treemacs-git-added-face ((t (:height 0.9))))
+  ;;  '(treemacs-git-modified-face ((t (:height 0.9))))
+  ;;  '(treemacs-file-face ((t (:height 0.9))))
+  ;;  '(treemacs-git-unmodified-face ((t (:height 0.9))))
+  ;;  '(treemacs-git-ignored-face ((t (:height 0.8))))
+  ;;  '(treemacs-git-untracked-face ((t (:height 0.9))))
+  ;;  )
+  ;; '(treemacs-collapse-dirs 3)
+  ;; '(treemacs-filewatch-mode t)
+  ;; '(treemacs-follow-mode nil)
+  ;; '(treemacs-fringe-indicator-mode t)
+  ;; '(treemacs-indentation 1)
+  ;; '(treemacs-resize-icons 16)
+
+  :bind
+  (:map global-map
+        ("M-0"       . treemacs-select-window)
+        ("C-x t 1"   . treemacs-delete-other-windows)
+        ("C-x t w"   . treemacs-switch-workspace)
+        ("C-x t t"   . treemacs)
+        ("C-x t d"   . treemacs-select-directory)
+        ("C-x t B"   . treemacs-bookmark)
+        ("C-x t C-t" . treemacs-find-file)
+        ("C-x t M-t" . treemacs-find-tag))
+  )
+
+(use-package treemacs-magit
+  :ensure
+  :after (treemacs magit)
+  :straight t)
+#+end_src
+
+* Auto-open on Treemacs Switch Workspaces =C-x t w=
+
+As I like to have treemacs open whenever i'm working on a project I
+always had to open treemacs, and then switch to the correct project.
+This got me a bit annoyed doing it every time, so this piece of advice
+will automatically open treemacs if not already visible after
+switching to a project.
+
+#+begin_src emacs-lisp
+;; advice to run after swithcing workspace
+(defun jf/show-treemacs-on-switch-workspace--advice (&optional args)
+  "Automatically open treemacs window on switching workspace.  Does nothing if already visible"
+  (pcase (treemacs-current-visibility)
+    ('exists (treemacs-select-window))
+    ('none (treemacs--init))))
+
+(advice-add 'treemacs-switch-workspace :after #'jf/show-treemacs-on-switch-workspace--advice)
+#+end_src
+
+* Switch and magit-status                                      :expirimental:
+
+#+begin_src emacs-lisp
+(defun my/treemacs-switch-and-magit-status ()
+  (interactive)
+  (treemacs-switch-workspace)
+  (magit-status))
 #+end_src
