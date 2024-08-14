@@ -1,4 +1,4 @@
-*.el
-*.elc
-*.gpg
-straight/
+*
+!*.org
+!*.md
+!*.dir-locals.el
