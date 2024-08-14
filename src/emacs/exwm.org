@@ -317,13 +317,13 @@ Start panel
 ;; Update panel indicator when workspace changes
 (add-hook 'exwm-workspace-switch-hook #'efs/send-polybar-exwm-workspace)
 
-(efs/run-in-background "polybar -c ~/Documents/git/faijdherbe.net/.dotfiles/.config/polybar/config panel")
+;(efs/run-in-background "polybar -c ~/Documents/git/faijdherbe.net/.dotfiles/.config/polybar/config panel")
 #+end_src
 
 And compton. we need transparency!
 #+begin_src emacs-lisp
-(when (version< "29" emacs-version)
-  (start-process-shell-command "compton" " *compton*" "compton"))
+;(when (version< "29" emacs-version)
+;  (start-process-shell-command "compton" " *compton*" "compton"))
 #+end_src
 
 * Xrandr

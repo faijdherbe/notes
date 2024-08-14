@@ -1,0 +1,17 @@
+#+TITLE: Fennel
+* Lua
+#+begin_src emacs-lisp
+  (use-package lua-mode
+    :straight t)
+#+end_src
+
+#+RESULTS:
+
+* Fennel
+#+begin_src emacs-lisp
+  (use-package fennel-mode
+    :straight t)
+#+end_src
+
+#+RESULTS:
+

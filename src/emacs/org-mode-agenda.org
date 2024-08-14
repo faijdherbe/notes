@@ -62,10 +62,9 @@ And also hide some other stuff for todo items on the left
           (org-roam-list-files)))
 
 (defun jf/org-agenda-files-update (&rest _)
-  "Update the value of `org-agenda-files'."
-  (setq org-agenda-files (jf/org-agenda-files)))
+  "Update the value of `org-agenda-files'.")
 
-(advice-add 'org-agenda :before #'jf/org-agenda-files-update)
+;; (advice-add 'org-agenda :before #'jf/org-agenda-files-update)
 #+end_src
 
 

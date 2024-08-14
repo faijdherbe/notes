@@ -1,0 +1,7 @@
+#+TITLE: Clojure
+
+* Cider
+#+begin_src emacs-lisp
+  (use-package cider
+    :straight t)
+#+end_src

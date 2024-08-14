@@ -23,3 +23,11 @@
 
 #+end_src
 * TODO org agenda
+#+begin_src emacs-lisp
+  (defun jf/org-agenda-refresh-files (&rest _)
+    (setq org-agenda-files
+  	(directory-files-recursively "~/Documents/BuJo" "^[^.].+\.org$" nil t t)))
+
+  (advice-add 'org-agenda :before #'jf/org-agenda-refresh-files)
+#+end_src
+

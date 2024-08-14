@@ -2,36 +2,44 @@
 
 ** Magit
 #+begin_src emacs-lisp
-(use-package transient
- :straight t)
+  (use-package transient
+   :straight t)
 
-(use-package magit
-  :straight t
-  :init
-  (setq magit-repository-directories '(("/home/jeroen/Documents/git/tid/akzo/outlet-flexa-nl" . 0)
-                                       ("/home/jeroen/Documents/git/tid/RFC/friso-ecom-hub" . 0) )
-        magit-repolist-columns '(("Name" 25 magit-repolist-column-ident nil)
-                                 ("Flag" 3 magit-repolist-column-flags)
-                                 ("Version" 25 magit-repolist-column-version
-                                  ((:sort magit-repolist-version<)))
-                                 ("Branch" 25 magit-repolist-column-branch)
-                                 ("B<U" 3 magit-repolist-column-unpulled-from-upstream
-                                  ((:right-align t)
-                                   (:sort <)))
-                                 ("B>U" 3 magit-repolist-column-unpushed-to-upstream
-                                  ((:right-align t)
-                                   (:sort <)))
-                                 ("Path" 99 magit-repolist-column-path nil)))
+  (use-package magit
+    :straight t
+    :init
+    (setq magit-repository-directories '(("/home/jeroen/Documents/git/tid/akzo/outlet-flexa-nl" . 0)
+                                         ("/home/jeroen/Documents/git/tid/RFC/friso-ecom-hub" . 0) )
+          magit-repolist-columns '(("Name" 25 magit-repolist-column-ident nil)
+                                   ("Flag" 3 magit-repolist-column-flags)
+                                   ("Version" 25 magit-repolist-column-version
+                                    ((:sort magit-repolist-version<)))
+                                   ("Branch" 25 magit-repolist-column-branch)
+                                   ("B<U" 3 magit-repolist-column-unpulled-from-upstream
+                                    ((:right-align t)
+                                     (:sort <)))
+                                   ("B>U" 3 magit-repolist-column-unpushed-to-upstream
+                                    ((:right-align t)
+                                     (:sort <)))
+                                   ("Path" 99 magit-repolist-column-path nil)))
 
-  :config
-  (setq magit-diff-use-overlays nil)
-  (define-key git-commit-mode-map (kbd "C-c i") 'jf/magit-insert-commit-prefix)
+    :config
+    (setq magit-diff-use-overlays nil)
+    (define-key git-commit-mode-map (kbd "C-c i") 'jf/magit-insert-commit-prefix)
 
-  :bind (("C-x g" . magit-status)
-         ("C-x G" . magit-list-repositories)))
+    :bind (("C-x g" . magit-status)
+           ("C-x G" . magit-list-repositories)
+  	 ("C-c r" . magit-pull-fro)))
 
-(defun jf/magit-insert-commit-prefix ()
-  "Insert current branch name using format =[{branch}] ="
-  (interactive)
-  (insert (format "[%s] " (magit-get-current-branch))))
+  (defun jf/magit-insert-commit-prefix ()
+    "Insert current branch name using format =[{branch}] ="
+    (interactive)
+    (insert (format "[%s] " (magit-get-current-branch))))
+#+end_src
+
+*** git auto commit mode
+#+begin_src emacs-lisp
+  (use-package git-auto-commit-mode
+    :ensure t
+    :straight t)
 #+end_src

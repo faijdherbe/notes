@@ -75,11 +75,15 @@ Currently there is an issue with org-mode verions...
 * context  
 throughout loading our configs we'll need to know whether to enable certain elements.  This sets up all predicates for any kind of selection we'll need.  We start off with a few indicators as to which kind of device we're dealing with. 
 #+begin_src emacs-lisp
-  (intern "my/phone")
-  (intern "my/laptop")
-  (intern "my/uconsole")
-  (intern "my/boox")
-  (intern "my/unknown")
+(require 'package)
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+    (package-initialize)
+
+      (intern "my/phone")
+        (intern "my/laptop")
+        (intern "my/uconsole")
+        (intern "my/boox")
+        (intern "my/unknown")
 #+end_src
 
 #+begin_src emacs-lisp
@@ -90,6 +94,7 @@ throughout loading our configs we'll need to know whether to enable certain elem
       (cond
        (phone 'my/phone)
        (boox 'my/boox)
+       ((string= hostname "fajid-clocky") 'my/uconsole)
        ((string= hostname "jeroen-XPS-9320") 'my/laptop)
        (t 'my/unknown))))
 
@@ -207,4 +212,26 @@ This file is likely to contian some configuration that is does not concern anyon
 #+begin_src emacs-lisp
 (when (my/device-laptop-p)
   (my/emacs-org-load-file "device/laptop.org"))
+#+end_src
+
+* Scratch
+#+begin_src emacs-lisp
+  (use-package denote
+    :ensure t
+    :straight t
+    :config
+    (setq denote-directory (expand-file-name "~/Documents/denotes/"))
+    (setq denote-save-buffers nil)
+    (setq denote-known-keywords '("emacs" "tid" "3d" "php" "lisp"))
+    (setq denote-infer-keywords t)
+    (setq denote-sort-keywords t)
+    (setq denote-file-type nil) ; Org is the default, set others here
+    (setq denote-prompts '(title keywords))
+    (setq denote-excluded-directories-regexp nil)
+    (setq denote-excluded-keywords-regexp nil)
+    (setq denote-rename-confirmations '(rewrite-front-matter modify-file-name))
+
+    ;; Pick dates, where relevant, with Org's advanced interface:
+    (setq denote-date-prompt-use-org-read-date t))
+
 #+end_src

@@ -52,18 +52,21 @@
 
 * Development specifics
 #+begin_src emacs-lisp
-(seq-do 'my/emacs-org-load-file
-        '(
-          "development/00-project.org"
-          "development/01-treemacs.org"
-          "development/03-git.org"
-          "development/04-eglot.org"
-          ;; "development/04-lsp.org"
-          "development/10-php.org"
-          "development/10-web.org"
-          "development/40-flycheck.org"
-          "development/40-snippets.org"
-          ))
+  (seq-do 'my/emacs-org-load-file
+          '(
+            "development/00-project.org"
+            "development/01-treemacs.org"
+            "development/03-git.org"
+            "development/04-eglot.org"
+            ;; "development/04-lsp.org"
+            "development/10-php.org"
+  	  "development/10-clojure.org"
+  	  "development/10-lisp.org"
+  	  "development/10-fennel.org"
+            "development/10-web.org"
+            "development/40-flycheck.org"
+            "development/40-snippets.org"
+            ))
 #+end_src
 
 
