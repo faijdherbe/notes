@@ -50,6 +50,25 @@
   :bind ("C-s" . 'swiper))
 #+END_SRC
 
+* jira-jump
+#+begin_src emacs-lisp
+  (use-package jira-jump
+    :ensure
+    :straight (jira-jump :repo "https://github.com/faijdherbe/jira-jump.el")
+    :bind (("C-c J j" . jira-jump-open-in-browser)
+  	 ("C-c J w" . jira-jump-send-to-kill-ring)
+  	 ("C-c J l" . jira-jump-insert-org-mode-link)
+  	 ("C-c J p" . jira-jump-issue-at-point))
+    :config
+    (setq jira-jump--projects
+  	'(("Client A" . ((instance . "https://client_a.atlassian.net")
+  			 (projects . ("FOO" "BAR"))))
+  	  ("Client B" . ((instance . "https://client_b.atlassian.net")
+  			 (projects . ("GARDN" "LIVINGRM" "KITCHN"))))
+  	  ("Internal" . ((instance . "https://my-company.atlassian.net")
+  			 (projects . ("DEVIMPR" "ONBOARDNG" "SUPPRT")))))))
+#+end_src
+
 * Development specifics
 #+begin_src emacs-lisp
   (seq-do 'my/emacs-org-load-file

@@ -29,7 +29,7 @@
 
     :bind (("C-x g" . magit-status)
            ("C-x G" . magit-list-repositories)
-  	 ("C-c r" . magit-pull-fro)))
+  	 ("C-c r" . magit-pull-from-pushremote)))
 
   (defun jf/magit-insert-commit-prefix ()
     "Insert current branch name using format =[{branch}] ="
